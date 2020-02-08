@@ -1,26 +1,22 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
+
+// Need 4px of fake padding, otherwise Firefox displays scrollbars
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const margin = {x: 50, y: 50, intra: 50},
+      fakePadding = 4,
+      firstRowWidth = (document.documentElement.clientWidth - fakePadding - 2*margin.x - 2*margin.intra) / 3,
+      baseHeight = (document.documentElement.clientHeight - 2*margin.y - margin.intra) / 2;
+
+    return (
+        <div className="App">
+            <svg id="baseSvg"
+                 height={document.documentElement.clientHeight - fakePadding}
+                 width={document.documentElement.clientWidth}>
+            </svg>
+        </div>
+    );
 }
 
 export default App;
