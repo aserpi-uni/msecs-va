@@ -22,7 +22,16 @@ class Elbow extends React.Component {
         return (
           <g id="elbowChart" className="elbow chart"
              width={this.props.width} height={this.props.height}
-             transform={`translate(${this.props.margin.x},${this.props.margin.y})`} />
+             transform={`translate(${this.props.margin.x},${this.props.margin.y})`}>
+              <text className="elbow axis label x"
+                    transform={`translate(${this.props.width/2},${this.props.height+2*this.props.margin.y/3})`}>
+                  Clusters
+              </text>
+              <text className="elbow axis label y"
+                    transform={`translate(-${2*this.props.margin.x/3},${this.props.height/2}),rotate(-90)`}>
+                  Variance explained
+              </text>
+          </g>
         )
     }
 
