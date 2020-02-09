@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import d3tip from 'd3-tip'
 import React from "react";
 
 import './Elbow.scss'
@@ -65,6 +66,12 @@ class Elbow extends React.Component {
           .attr("class", "elbow axis y")
           .call(d3.axisLeft(yScale));
 
+        const tip = d3tip()
+          .attr("class", "elbow tooltip")
+          .html(k => `Clusters: <strong>${k.k}</strong><br>Variance explained: <strong>${k.variance}</strong>`)
+          .offset([-10, 0]);
+        svg.call(tip);
+
         svg.selectAll(".elbow.dot-k")
           .data(varianceExplained)
           .enter().append("circle")
@@ -72,6 +79,8 @@ class Elbow extends React.Component {
             .attr("cx", d => xScale(d.k))
             .attr("cy", d => yScale(d.variance))
             .attr("r", 5)
+            .on("mouseover", tip.show)
+            .on("mouseout", tip.hide)
             .on("click", dotOnClick);
     }
 }
