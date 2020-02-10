@@ -6,17 +6,6 @@ import './Elbow.scss'
 import varianceExplainedCsv from "./dataset/variance_explained.csv"
 
 
-function dotOnClick(dot, i, dots) {
-    const dotClicked = d3.select(this);
-    if(dotClicked.classed("selected")) {
-        return
-    }
-
-    d3.selectAll(dots).classed("selected", false);
-    dotClicked.classed("selected", true);
-    //TODO: update other visualisations
-}
-
 class Elbow extends React.Component {
     render() {
         return (
@@ -90,7 +79,21 @@ class Elbow extends React.Component {
             .attr("r", 5)
             .on("mouseover", tip.show)
             .on("mouseout", tip.hide)
-            .on("click", dotOnClick);
+            .on("click", this.onDotClick(this.props.onRunChange));
+    }
+
+    onDotClick(callback) {
+        return function (d, i, c) {
+            const dotClicked = d3.select(this);
+            if(dotClicked.classed("selected")) {
+                return
+            }
+
+            d3.selectAll(c).classed("selected", false);
+            dotClicked.classed("selected", true);
+
+            if(callback !== undefined) callback(d.k);
+        }
     }
 }
 
