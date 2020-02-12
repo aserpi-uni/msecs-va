@@ -4,7 +4,7 @@ import React from 'react';
 import './App.scss';
 import Elbow from "./Elbow";
 import Umap from "./Umap";
-import {distance} from "./utils";
+import {distance, parseDatasetElement} from "./utils";
 import mainDataset from "./dataset/dataset.csv";
 
 
@@ -53,20 +53,7 @@ class App extends React.Component {
     }
 
     async componentDidMount() {
-        this.setState({
-            dataset: await d3.csv(mainDataset, function (d) {
-                return {
-                    f1: +d.f1,
-                    f2: +d.f2,
-                    f3: d.f3,
-                    f4: +d.f4,
-                    f5: d.f5,
-                    f6: d.f6,
-                    f7: d.f7,
-                    f8: +d.f8
-                }
-            })
-        });
+        this.setState({ dataset: await d3.csv(mainDataset, parseDatasetElement) });
     }
 
     updateFromElbow(new_k) {

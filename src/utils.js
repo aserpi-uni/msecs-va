@@ -10,3 +10,13 @@ function distance(d1, d2) {
 
     return Math.sqrt(totalDistance)
 }
+
+function parseDatasetElement(d) {
+    const newD = {};
+    categoricalFeatures.forEach(f => newD[f] = d[f]);
+    numericalFeatures.forEach(f => newD[f] = +d[f]);
+
+    return newD;
+}
+
+export { computeVariance, distance, parseDatasetElement }
