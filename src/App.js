@@ -19,7 +19,6 @@ class App extends React.Component {
             umap: {
                 nNeighbors: 15,
                 minDist: 0.1,
-                spread: 1.0
             }
         }
     }
@@ -44,8 +43,7 @@ class App extends React.Component {
                       <Umap height={commonHeight} width={firstRowWidth} margin={umapMargin}
                             dataset={this.state.dataset} distance={distance}
                             colorScale={this.state.colorScale}
-                            nNeighbors={this.state.umap.nNeighbors}
-                            minDist={this.state.umap.minDist} spread={this.state.umap.spread}/>
+                            nNeighbors={this.state.umap.nNeighbors} minDist={this.state.umap.minDist}/>
                   }
               </svg>
           </div>

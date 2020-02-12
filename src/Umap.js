@@ -32,9 +32,7 @@ function Umap(props) {
             const datasetReduced = await new UMAP({
                 distanceFn: props.distance,
                 minDist: props.minDist,
-                nComponents: props.nComponents,
-                nNeighbors: props.nNeighbors,
-                spread: props.spread})
+                nNeighbors: props.nNeighbors})
               .fitAsync(props.dataset, setEpoch);
 
             const svg = d3.select('#umapChart'),
@@ -71,15 +69,7 @@ function Umap(props) {
         }
 
         reduceDataset();
-    }, [props.dataset,
-        props.height,
-        props.width,
-        props.nComponents,
-        props.nNeighbors,
-        props.minDist,
-        props.spread,
-        props.colorScale
-    ]);
+    }, [props.dataset, props.minDist, props.nNeighbors]);
 
     // TODO: improve loading card
     return (
