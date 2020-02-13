@@ -4,6 +4,8 @@ import {UMAP} from "umap-js";
 import {CircularProgress, Grid, Paper, Typography} from "@material-ui/core";
 import {makeStyles} from "@material-ui/styles";
 
+import './Umap.scss'
+
 
 function Umap(props) {
     const [epoch, setEpoch] = useState(-1);
@@ -14,12 +16,16 @@ function Umap(props) {
         },
 
         backgroundLayer: {
+            display: 'grid',
             height: props.height,
             width: props.width
         },
 
         backgroundPaper: {
+            alignItems: 'center',
+            display: 'grid',
             height: 3*props.height/5,
+            justifyItems: 'center',
             margin: 0,
             width: props.width/2
         }
@@ -34,6 +40,7 @@ function Umap(props) {
                 minDist: props.minDist,
                 nNeighbors: props.nNeighbors})
               .fitAsync(props.dataset, setEpoch);
+            setEpoch(-1);
 
             const svg = d3.select('#umapChart'),
               h = props.height,
@@ -59,51 +66,39 @@ function Umap(props) {
             svg.selectAll(".umap.dot")
               .data(datasetReduced)
               .enter().append("circle")
-              .attr("class", "umap dot")
-              .attr("cx", d => xScale(d[0]))
-              .attr("cy", d => yScale(d[1]))
-              .attr("r", 1)
-              .style("fill", props.colorScale);
-
-            setEpoch(-1);
+                .attr("class", "umap dot")
+                .attr("cx", d => xScale(d[0]))
+                .attr("cy", d => yScale(d[1]))
+                .attr("r", 2)
+                .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
         }
 
         reduceDataset();
     }, [props.dataset, props.minDist, props.nNeighbors]);
 
     // TODO: improve loading card
+    function renderLoadingCard() {
+        return (
+            <foreignObject width={props.width} height={props.height}
+                           transform={`translate(${props.margin.x},${props.margin.y})`}>
+                <Grid className={classes.backgroundLayer} alignItems='center' justify='center'>
+                    <Paper className={classes.backgroundPaper}>
+                        <CircularProgress/>
+                        <Typography variant='h5'>
+                            Epoch {epoch}
+                        </Typography>
+                    </Paper>
+                </Grid>
+            </foreignObject>
+        )
+    }
+
+    if(epoch >= 0) return renderLoadingCard();
     return (
-      <g>
-          <g id="umapChart" className="umap chart"
-             width={props.width} height={props.height}
-             transform={`translate(${props.margin.x},${props.margin.y})`}/>
-          {
-              epoch >= 0 &&
-              <g>
-                <foreignObject width={props.width} height={props.height}
-                               transform={`translate(${props.margin.x},${props.margin.y})`}>
-                    <Grid container className={classes.backgroundLayer} justify={"center"} alignItems={"center"}>
-                        <Grid item>
-                            <Paper className={classes.backgroundPaper}>
-                                <Grid container className={classes.backgroundPaper} spacing={0}
-                                      alignItems={"center"} justify={"center"}>
-                                    <Grid item xs={12}>
-                                        <CircularProgress/>
-                                    </Grid>
-                                    <Grid>
-                                        <Typography xs={12}>
-                                            Epoch {epoch}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                </foreignObject>
-            </g>
-          }
-      </g>
-    )
+      <g id="umapChart" className="umap chart"
+         width={props.width} height={props.height}
+         transform={`translate(${props.margin.x},${props.margin.y})`}/>
+    );
 }
 
 export default Umap
