@@ -1,0 +1,23 @@
+.elbow {
+  &.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+  }
+
+  &.dot-k {
+    fill: #ffab00;
+    stroke: #fff;
+    transition: 0.75s;
+
+    &:hover {
+      fill: coral;
+      stroke: coral;
+    }
+
+    &.selected {
+      fill: sienna;
+      stroke: sienna;
+    }
+  }
+}
