@@ -9,6 +9,7 @@ import './Umap.scss'
 
 function Umap(props) {
     const [epoch, setEpoch] = useState(-1);
+    const [datasetReduced, setDatasetReduced] = useState([]);
 
     const classes = makeStyles({
         alignCenter: {
@@ -31,50 +32,67 @@ function Umap(props) {
         }
     })();
 
+    function mergeClusters(datasetReduced) {
+        for(let i = 0; i < datasetReduced.length; i++) {
+            datasetReduced[i][2] = props.clusters[i];
+        }
+    }
+
+    async function drawUmap() {
+        const datasetReducedTemp = await new UMAP({
+            distanceFn: props.distance,
+            minDist: props.minDist,
+            nNeighbors: props.nNeighbors})
+          .fitAsync(props.dataset, setEpoch);
+        if(props.clusters !== undefined) mergeClusters(datasetReducedTemp);
+        setEpoch(-1);
+
+        const svg = d3.select('#umapChart'),
+          h = props.height,
+          w = props.width;
+
+        const xScale = d3.scaleLinear()
+          .domain([d3.min(datasetReducedTemp, v => v[0]), d3.max(datasetReducedTemp, v => v[0])])
+          .range([0, w]);
+
+        const yScale = d3.scaleLinear()
+          .domain([d3.min(datasetReducedTemp, v => v[1]), d3.max(datasetReducedTemp, v => v[1])])
+          .range([h, 0]);
+
+        svg.append("g")
+          .attr("class", "umap axis x")
+          .attr("transform", `translate(0, ${h})`)
+          .call(d3.axisBottom(xScale));
+
+        svg.append("g")
+          .attr("class", "umap axis y")
+          .call(d3.axisLeft(yScale));
+
+        svg.selectAll(".umap.dot")
+          .data(datasetReducedTemp)
+          .enter().append("circle")
+          .attr("class", "umap dot")
+          .attr("cx", d => xScale(d[0]))
+          .attr("cy", d => yScale(d[1]))
+          .attr("r", 2)
+          .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
+
+        setDatasetReduced(datasetReducedTemp);
+    }
+
+    useEffect(function() {
+        if(props.clusters === undefined) return;
+        mergeClusters(datasetReduced);
+
+        d3.selectAll(".umap.dot")
+          .transition(d3.transition().duration(750))
+          .style("fill", d => props.colorScale(d[2]))
+    }, [props.clusters]);
+
     useEffect( function() {
         if(props.dataset === undefined) return;
-
-        async function reduceDataset() {
-            const datasetReduced = await new UMAP({
-                distanceFn: props.distance,
-                minDist: props.minDist,
-                nNeighbors: props.nNeighbors})
-              .fitAsync(props.dataset, setEpoch);
-            setEpoch(-1);
-
-            const svg = d3.select('#umapChart'),
-              h = props.height,
-              w = props.width;
-
-            const xScale = d3.scaleLinear()
-              .domain([d3.min(datasetReduced, v => v[0]), d3.max(datasetReduced, v => v[0])])
-              .range([0, w]);
-
-            const yScale = d3.scaleLinear()
-              .domain([d3.min(datasetReduced, v => v[1]), d3.max(datasetReduced, v => v[1])])
-              .range([h, 0]);
-
-            svg.append("g")
-              .attr("class", "umap axis x")
-              .attr("transform", `translate(0, ${h})`)
-              .call(d3.axisBottom(xScale));
-
-            svg.append("g")
-              .attr("class", "umap axis y")
-              .call(d3.axisLeft(yScale));
-
-            svg.selectAll(".umap.dot")
-              .data(datasetReduced)
-              .enter().append("circle")
-                .attr("class", "umap dot")
-                .attr("cx", d => xScale(d[0]))
-                .attr("cy", d => yScale(d[1]))
-                .attr("r", 2)
-                .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
-        }
-
-        reduceDataset();
-    }, [props.dataset, props.minDist, props.nNeighbors]);
+        drawUmap();
+    }, [props.minDist, props.nNeighbors]);
 
     // TODO: improve loading card
     function renderLoadingCard() {
