@@ -51,7 +51,8 @@ class App extends React.Component {
                width={width}>
                   <Elbow height={commonHeight} width={firstRowWidth} margin={margin}
                          dataset={this.state.dataset} clusters={this.state.clusters}
-                         onRunChange={this.updateFromElbow}/>
+                         centroids={this.state.centroids}
+                         onRunChange={this.updateFromElbow()}/>
 
                   <Umap height={commonHeight} width={firstRowWidth} margin={umapMargin}
                         clusters={this.state.clusters[this.state.currentRun]} dataset={this.state.dataset}
@@ -84,8 +85,11 @@ class App extends React.Component {
         }
     }
 
-    updateFromElbow(new_k) {
-        // TODO: update other visualisations
+    updateFromElbow() {
+        const component = this;
+        return function(new_k) {
+            component.setState({currentRun: new_k})
+        }
     }
 }
 
