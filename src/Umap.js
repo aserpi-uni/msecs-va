@@ -30,12 +30,12 @@ function Umap(props) {
 
         async function reduceDataset() {
             const datasetReduced = await new UMAP({
+                distanceFn: props.distance,
+                minDist: props.minDist,
                 nComponents: props.nComponents,
                 nNeighbors: props.nNeighbors,
-                minDist: props.minDist,
                 spread: props.spread})
-              .fitAsync(props.dataset, setEpoch
-              );
+              .fitAsync(props.dataset, setEpoch);
 
             const svg = d3.select('#umapChart'),
               h = props.height,

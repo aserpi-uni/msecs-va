@@ -4,6 +4,7 @@ import React from 'react';
 import './App.scss';
 import Elbow from "./Elbow";
 import Umap from "./Umap";
+import {distance} from "./utils";
 import mainDataset from "./dataset/dataset.csv";
 
 
@@ -41,9 +42,10 @@ class App extends React.Component {
                   {
                       this.state.dataset &&
                       <Umap height={commonHeight} width={firstRowWidth} margin={umapMargin}
+                            dataset={this.state.dataset} distance={distance}
+                            colorScale={this.state.colorScale}
                             nNeighbors={this.state.umap.nNeighbors}
-                            minDist={this.state.umap.minDist} spread={this.state.umap.spread}
-                            dataset={this.state.dataset} colorScale={this.state.colorScale}/>
+                            minDist={this.state.umap.minDist} spread={this.state.umap.spread}/>
                   }
               </svg>
           </div>
