@@ -8,8 +8,8 @@ import './Umap.scss'
 
 
 function Umap(props) {
-    const [epoch, setEpoch] = useState(-1);
     const [datasetReduced, setDatasetReduced] = useState([]);
+    const [epoch, setEpoch] = useState(-1);
 
     const classes = makeStyles({
         alignCenter: {
@@ -45,6 +45,7 @@ function Umap(props) {
             nNeighbors: props.nNeighbors})
           .fitAsync(props.dataset, setEpoch);
         if(props.clusters !== undefined) mergeClusters(datasetReducedTemp);
+        setDatasetReduced(datasetReducedTemp);
         setEpoch(-1);
 
         const svg = d3.select('#umapChart'),
@@ -76,8 +77,6 @@ function Umap(props) {
           .attr("cy", d => yScale(d[1]))
           .attr("r", 2)
           .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
-
-        setDatasetReduced(datasetReducedTemp);
     }
 
     useEffect(function() {
@@ -97,7 +96,7 @@ function Umap(props) {
     // TODO: improve loading card
     function renderLoadingCard() {
         return (
-            <foreignObject width={props.width} height={props.height}
+            <foreignObject height={props.height} width={props.width}
                            transform={`translate(${props.margin.x},${props.margin.y})`}>
                 <Grid className={classes.backgroundLayer} alignItems='center' justify='center'>
                     <Paper className={classes.backgroundPaper}>
@@ -114,9 +113,10 @@ function Umap(props) {
     if(epoch >= 0) return renderLoadingCard();
     return (
       <g id="umapChart" className="umap chart"
-         width={props.width} height={props.height}
+         height={props.height} width={props.width}
          transform={`translate(${props.margin.x},${props.margin.y})`}/>
     );
 }
+
 
 export default Umap

@@ -29,6 +29,7 @@ function parseFiles(files) {
     }
 }
 
+
 // Wrap readEntries in a promise to make working with readEntries easier
 // readEntries will return only some of the entries in a directory
 // e.g. Chrome returns at most 100 entries at a time
@@ -53,19 +54,23 @@ function DropFiles(props){
         backdrop: {
             zIndex: 1
         },
+
         backgroundLayer: {
             height: props.height,
             width: props.width
         },
+
         bigIcon: {
             color: "#fff",
             fontSize: "3.5rem"
         },
+
         dropLayer: {
             height: "inherit",
             padding: 0,
             width: "inherit"
         },
+
         dropPaper: {
             alignItems: "center",
             backgroundColor: "#ffab00",
@@ -74,9 +79,11 @@ function DropFiles(props){
             justifyItems: "center",
             width: 600
         },
+
         paddedGidItem: {
             paddingTop: 30,
         },
+
         paperLayer: {
             height: 275,
             width: 640
@@ -86,7 +93,6 @@ function DropFiles(props){
     async function onDrag(e) {
         e.preventDefault();
         e.stopPropagation();
-
         setDragging(true);
     }
 
@@ -105,6 +111,7 @@ function DropFiles(props){
             datasetFile = ret.datasetFile;
             runFiles = ret.runFiles
         }
+
         else {
             const directory = e.dataTransfer.items[0].webkitGetAsEntry();
             if(! directory.isDirectory) {
@@ -114,6 +121,7 @@ function DropFiles(props){
                 setBackdrop(false);
                 return;
             }
+
             else {
                 const directoryReader = directory.createReader(),
                   files = [];
@@ -152,8 +160,8 @@ function DropFiles(props){
     return (
       <Grid container className={classes.backgroundLayer} alignItems="center" justify="center">
           <Paper className={classes.paperLayer}>
-              <Grid container direction="column" className={classes.paperLayer}
-                    alignItems="center" justify="center">
+              <Grid container className={classes.paperLayer}
+                    alignItems="center" direction="column" justify="center">
                   <Grid>
                       <Typography variant="h3">
                           Drop your files on this box
@@ -170,8 +178,8 @@ function DropFiles(props){
           <Backdrop className={classes.backdrop} open={backdrop}>
               <CircularProgress/>
           </Backdrop>
-          <Snackbar open={snackbar} anchorOrigin={{ horizontal: "center", vertical: "top" }}
-                    autoHideDuration={6000} onClose={() => setSnackbar(false)}>
+          <Snackbar anchorOrigin={{ horizontal: "center", vertical: "top" }} autoHideDuration={6000}
+                    onClose={() => setSnackbar(false)} open={snackbar}>
               <Alert severity="error">
                   <AlertTitle>Error</AlertTitle>
                   {errorMessage}
@@ -180,5 +188,6 @@ function DropFiles(props){
       </Grid>
     )
 }
+
 
 export default DropFiles

@@ -1,20 +1,15 @@
 import * as d3 from 'd3'
 
 
+// General objects
+
 const categoricalFeatures = ["f0", "f1", "f3", "f7"],
   numericalFeatures = ["f2", "f4", "f5", "f6"],
   gamma = 0.14;
 
-function computeSse(dataset, labels, centroids) {
-    const sse = {};
-    for(let i = 0; i < dataset.length; i++) {
-        const c = labels[i];
-        sse[c] = (sse[c] || 0) + distance(dataset[i], centroids[c])**2
-    }
-    return d3.sum(Object.keys(sse), k => sse[k])
-}
 
-// A custom weighted Heterogeneous Euclidean-Overlap Metric (HEOM)
+// A weighted Heterogeneous Euclidean-Overlap Metric (HEOM)
+// Gamma must be the same as in the k-prototypes runs.
 function distance(d1, d2) {
     let totalDistance = 0;
     categoricalFeatures.forEach(f => totalDistance += d1[f] === d2[f] ? 0 : gamma);
@@ -22,6 +17,7 @@ function distance(d1, d2) {
 
     return Math.sqrt(totalDistance)
 }
+
 
 function parseDatasetElement(d) {
     const newD = {};
@@ -32,37 +28,52 @@ function parseDatasetElement(d) {
 }
 
 
-let squaredDistance = undefined;
+// Elbow-method objects
 
-function computeSquareDistances(dataset) {
+let commonElbowDenominator = undefined;
+
+
+function computeCommonElbowDenominator(dataset) {
     let totalDistance = 0;
     for(let i = 0; i < dataset.length; i++) {
         for(let j = i + 1; j < dataset.length; j++) {
             totalDistance += distance(dataset[i], dataset[j])**2
         }
     }
-    squaredDistance = totalDistance;
+
+    commonElbowDenominator = totalDistance * dataset.length;
 }
 
-function computeWeightedSquareOfDistance(dataset, labels, k) {
-    dataset.forEach((d, i) => d.cluster = labels[i]);
-    let totalDistance = 0;
 
-    for(let clusterIndex = 0; clusterIndex < k; clusterIndex ++) {
-        const cluster = dataset.filter(d => d.cluster === clusterIndex);
-        let clusterDistance = 0;
-        cluster.forEach(c => dataset.forEach(d => clusterDistance += distance(c, d)));
-
-        totalDistance += (clusterDistance**2) / cluster.length;
+function computeSse(dataset, labels, centroids) {
+    const sse = {};
+    for(let i = 0; i < dataset.length; i++) {
+        const c = labels[i];
+        sse[c] = (sse[c] || 0) + distance(dataset[i], centroids[c])**2
     }
 
-    return totalDistance / (k - 1);
+    return d3.sum(Object.keys(sse), k => sse[k])
 }
+
+
+function computeWeightedSquareOfDistance(dataset, labels, k) {
+    const se = {},
+      clusterLength = {};
+    for(let i = 0; i < dataset.length; i++) {
+        const c = labels[i],
+          d = dataset[i];
+        clusterLength[c] = (clusterLength[c] || 0) + 1;
+        se[c] = (se[c] || 0) + d3.sum(dataset, d2 => distance(d, d2))
+    }
+
+    return d3.sum(Object.keys(se), c => se[c]**2 / clusterLength[c]) / (k - 1)
+}
+
 
 function computeVariance(dataset, labels, k) {
-    if(! squaredDistance) computeSquareDistances(dataset);
-    return computeWeightedSquareOfDistance(dataset, labels, k) / (dataset.length * squaredDistance)
+    if(! commonElbowDenominator) computeCommonElbowDenominator(dataset);
+    return computeWeightedSquareOfDistance(dataset, labels, k) / commonElbowDenominator
 }
 
 
-export { computeSse, distance, parseDatasetElement,computeVariance }
+export { computeSse, computeVariance ,distance, parseDatasetElement }

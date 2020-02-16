@@ -35,8 +35,10 @@ class App extends React.Component {
 
         if(this.state.dataset && this.state.numRuns === 0) return this.renderApp(w, h);
         return (
-          <DropFiles height={h} width={w} onDroppedFiles={this.setNumRuns()}
-                     runCallback={this.parseRunFile()} datasetCallback={this.parseDatasetFile()}/>)
+          <DropFiles height={h} width={w}
+                     datasetCallback={this.parseDatasetFile()} onDroppedFiles={this.setNumRuns()}
+                     runCallback={this.parseRunFile()}/>
+          )
     }
 
     renderApp(width, height) {
@@ -46,32 +48,31 @@ class App extends React.Component {
           umapMargin = {x: margin.x + 2*firstRowWidth + 2*margin.intra, y: margin.intra};
 
         return (
-          <svg id="baseSvg"
-               height={height}
-               width={width}>
-                  <Elbow height={commonHeight} width={firstRowWidth} margin={margin}
-                         dataset={this.state.dataset} clusters={this.state.clusters}
-                         centroids={this.state.centroids}
-                         onRunChange={this.updateFromElbow()}/>
+          <svg id="baseSvg" height={height} width={width}>
+              <Elbow height={commonHeight} width={firstRowWidth} margin={margin}
+                     centroids={this.state.centroids} clusters={this.state.clusters}
+                     dataset={this.state.dataset}
+                     onRunChange={this.updateFromElbow()}/>
 
-                  <Umap height={commonHeight} width={firstRowWidth} margin={umapMargin}
-                        clusters={this.state.clusters[this.state.currentRun]} dataset={this.state.dataset}
-                        colorScale={this.state.colorScale} distance={distance}
-                        minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}/>
+              <Umap height={commonHeight} margin={umapMargin} width={firstRowWidth}
+                    clusters={this.state.clusters[this.state.currentRun]} dataset={this.state.dataset}
+                    colorScale={this.state.colorScale} distance={distance}
+                    minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}/>
           </svg>
         )
     }
 
     setNumRuns() {
         const component = this;
-        return function(n) {component.setState(prevState => ({numRuns: prevState.numRuns + n}))}
+        return n => component.setState(prevState => ({numRuns: prevState.numRuns + n}))
     }
 
     parseDatasetFile() {
         const component = this;
         return async function(datasetFile) {
-            const dataset = d3.csvParse(await datasetFile.text(), parseDatasetElement);
-            component.setState({dataset: dataset})
+            component.setState({
+                dataset: d3.csvParse(await datasetFile.text(), parseDatasetElement)
+            })
         }
     }
 
@@ -79,18 +80,20 @@ class App extends React.Component {
         const component = this;
         return async function (runFile) {
             const m = runFile.name.match(/(centroids|clusters)_(\d+)\.csv/);
-            if(m && m[1] === "centroids") component.state.centroids[m[2]] = d3.csvParse(await  runFile.text(), parseDatasetElement);
-            else if(m && m[1] === "clusters") component.state.clusters[m[2]] = d3.csvParseRows(await runFile.text(), c => +c[0]);
+            if(m && m[1] === "centroids") {
+                component.state.centroids[m[2]] = d3.csvParse(await  runFile.text(), parseDatasetElement)
+            } else if(m && m[1] === "clusters") {
+                component.state.clusters[m[2]] = d3.csvParseRows(await runFile.text(), c => +c[0])
+            }
             component.setState(prevState => ({ numRuns: prevState.numRuns - 1}))
         }
     }
 
     updateFromElbow() {
         const component = this;
-        return function(new_k) {
-            component.setState({currentRun: new_k})
-        }
+        return new_k => component.setState({currentRun: new_k})
     }
 }
+
 
 export default App;

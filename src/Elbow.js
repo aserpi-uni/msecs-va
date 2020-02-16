@@ -80,12 +80,13 @@ function Elbow(props) {
 
     return (
       <g id="elbowChart" className="elbow chart"
-         width={props.width} height={props.height}
+         height={props.height} width={props.width}
          transform={`translate(${props.margin.x},${props.margin.y})`}>
           <text className="elbow axis label x"
                 transform={`translate(${props.width/2},${props.height+2*props.margin.y/3})`}>
               Number of clusters
           </text>
+
           <text className="elbow axis label y"
                 transform={`translate(-${2*props.margin.x/3},${props.height/2}),rotate(-90)`}>
               Sum of squared errors
@@ -93,5 +94,6 @@ function Elbow(props) {
       </g>
     )
 }
+
 
 export default Elbow
