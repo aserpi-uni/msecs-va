@@ -1,10 +1,20 @@
 import * as d3 from 'd3'
 import React, {useEffect, useState} from "react";
 import {UMAP} from "umap-js";
-import {CircularProgress, Grid, Paper, Typography} from "@material-ui/core";
+import {
+    Drawer,
+    Grid,
+    LinearProgress,
+    Paper,
+    Slider,
+    Typography
+} from "@material-ui/core";
 import {makeStyles} from "@material-ui/styles";
 
 import './Umap.scss'
+
+
+const nEpochs = 500;
 
 
 function Umap(props) {
@@ -42,6 +52,7 @@ function Umap(props) {
         const datasetReducedTemp = await new UMAP({
             distanceFn: props.distance,
             minDist: props.minDist,
+            nEpochs: nEpochs,
             nNeighbors: props.nNeighbors})
           .fitAsync(props.dataset, setEpoch);
         if(props.clusters !== undefined) mergeClusters(datasetReducedTemp);
@@ -96,17 +107,25 @@ function Umap(props) {
     // TODO: improve loading card
     function renderLoadingCard() {
         return (
-            <foreignObject height={props.height} width={props.width}
-                           transform={`translate(${props.margin.x},${props.margin.y})`}>
-                <Grid className={classes.backgroundLayer} alignItems='center' justify='center'>
-                    <Paper className={classes.backgroundPaper}>
-                        <CircularProgress/>
-                        <Typography variant='h5'>
-                            Epoch {epoch}
-                        </Typography>
-                    </Paper>
-                </Grid>
-            </foreignObject>
+          <foreignObject height={props.height} width={props.width}
+                         transform={`translate(${props.margin.x},${props.margin.y})`}>
+              <Grid className={classes.backgroundLayer} alignItems='center' justify='center'>
+                  <Paper className={classes.backgroundPaper}>
+                      <LinearProgress className="umap progress epoch" variant="determinate"
+                                      value={parseInt(epoch / nEpochs * 100)}/>
+
+                      <span>
+                          <Typography variant='h5' display={'inline'}>
+                              Epoch {epoch}
+                          </Typography>
+
+                          <Typography display={'inline'}>
+                              /{ nEpochs }
+                          </Typography>
+                      </span>
+                  </Paper>
+              </Grid>
+          </foreignObject>
         )
     }
 

@@ -3,4 +3,11 @@
     fill: dimgray;
     stroke-width: 0;
   }
+
+  &.progress.epoch {
+    margin-left: 25px;
+    margin-right: 25px;
+    width: -moz-available;
+    width: -webkit-fill-available;
+  }
 }
