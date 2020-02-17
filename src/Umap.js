@@ -2,24 +2,73 @@ import * as d3 from 'd3'
 import React, {useEffect, useState} from "react";
 import {UMAP} from "umap-js";
 import {
+    Button,
     Drawer,
     Grid,
+    Input,
     LinearProgress,
     Paper,
     Slider,
     Typography
 } from "@material-ui/core";
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import ReplayIcon from '@material-ui/icons/Replay';
+import SettingsIcon from '@material-ui/icons/Settings';
 import {makeStyles} from "@material-ui/styles";
 
 import './Umap.scss'
 
 
+const minDistMarks = [...Array(9).keys()].map(function(x) {
+    x = (x + 1) / 10;
+    return { label: x.toString(), value: x }
+});
+minDistMarks.push({label: "0", value: 0.01});
+minDistMarks.push({label: "1", value: 0.99});
 const nEpochs = 500;
+const nNeighborsMarks = [...Array(8).keys()].map(function (x) {
+    x = (x + 1) * 25;
+    return {label: x.toString(), value: x}
+});
+nNeighborsMarks.push({label: "0", value: 1});
+nNeighborsMarks.push({label: "15", value: 15});
 
 
 function Umap(props) {
     const [datasetReduced, setDatasetReduced] = useState([]);
     const [epoch, setEpoch] = useState(-1);
+    const [minDist, setMinDist] = useState(props.minDist);
+    const [minDistTemp, setMinDistTemp] = useState(props.minDist);
+    const [nNeighbors, setNNeighbors] = useState(props.nNeighbors);
+    const [nNeighborsTemp, setNNeighborsTemp] = useState(props.nNeighbors);
+    const [openSettings, setOpenSettings] = useState(false);
+
+    function onMinDistChange(e, v) {
+        if(v === undefined) v = (e.target.value === '' ? '' : parseFloat(e.target.value));
+        setMinDistTemp(v);
+    }
+
+    function onNNeighborsChange(e, v) {
+        if(v === undefined) v = (e.target.value === '' ? '' : parseFloat(e.target.value));
+        setNNeighborsTemp(v);
+    }
+
+    function onRepeatClicked() {
+        setOpenSettings(false);
+        drawUmap();
+    }
+
+    function onRunClicked() {
+        setMinDist(minDistTemp);
+        setNNeighbors(nNeighborsTemp);
+        setOpenSettings(false);
+    }
+
+    function onSettingsClose() {
+        setOpenSettings(false);
+        setMinDistTemp(minDist);
+        setNNeighborsTemp(nNeighbors)
+    }
 
     const classes = makeStyles({
         alignCenter: {
@@ -51,9 +100,9 @@ function Umap(props) {
     async function drawUmap() {
         const datasetReducedTemp = await new UMAP({
             distanceFn: props.distance,
-            minDist: props.minDist,
+            minDist: minDist,
             nEpochs: nEpochs,
-            nNeighbors: props.nNeighbors})
+            nNeighbors: nNeighbors})
           .fitAsync(props.dataset, setEpoch);
         if(props.clusters !== undefined) mergeClusters(datasetReducedTemp);
         setDatasetReduced(datasetReducedTemp);
@@ -86,7 +135,7 @@ function Umap(props) {
           .attr("class", "umap dot")
           .attr("cx", d => xScale(d[0]))
           .attr("cy", d => yScale(d[1]))
-          .attr("r", 2)
+          .attr("r", 3)
           .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
     }
 
@@ -100,9 +149,8 @@ function Umap(props) {
     }, [props.clusters]);
 
     useEffect( function() {
-        if(props.dataset === undefined) return;
         drawUmap();
-    }, [props.minDist, props.nNeighbors]);
+    }, [minDist, nNeighbors]);
 
     // TODO: improve loading card
     function renderLoadingCard() {
@@ -129,11 +177,75 @@ function Umap(props) {
         )
     }
 
+    function renderSettingsDrawer() {
+        return (
+          <Drawer anchor="bottom" open={openSettings} onClose={onSettingsClose}>
+              <Grid container className="umap settings container">
+                  <Typography variant="h5" className="umap settings min-dist header">
+                      minDist
+                  </Typography>
+
+                  <Slider className="umap settings min-dist slider"
+                          defaultValue={minDist} max={0.99} min={0.01} step={0.01} value={minDistTemp}
+                          marks={minDistMarks} valueLabelDisplay="auto"
+                          onChange={onMinDistChange}/>
+
+                  <Input className="umap settings min-dist number"
+                         inputProps={{max: 1, min: 0.01, step: 0.1, type: "number"}}
+                         value={minDistTemp} onChange={onMinDistChange}/>
+
+                  <Typography variant="h5" className="umap settings n-neighbors header">
+                      nNeighbors
+                  </Typography>
+
+                  <Slider className="umap settings n-neighbors slider"
+                          defaultValue={nNeighbors} max={200} min={1} value={nNeighborsTemp}
+                          marks={nNeighborsMarks} valueLabelDisplay="auto"
+                          onChange={onNNeighborsChange}/>
+
+                  <Input className="umap settings n-neighbors number"
+                         inputProps={{max: 200, min: 1, step: 1, type: "number"}}
+                         value={nNeighborsTemp} onChange={onNNeighborsChange}/>
+
+                  <div className="umap settings run">
+                      { renderSettingsRunButton() }
+                  </div>
+              </Grid>
+          </Drawer>
+        )
+    }
+
+    function renderSettingsRunButton() {
+        if(minDistTemp === minDist && nNeighborsTemp === nNeighbors) {
+            return (
+              <Button variant="contained" size="large"
+                      startIcon={<ReplayIcon/>} onClick={onRepeatClicked}>
+                  Re-run
+              </Button>
+            )
+        }
+        else {
+            return (
+              <Button variant="contained" size="large"
+                      startIcon={<PlayArrowIcon/>} onClick={onRunClicked}>
+                  Run
+              </Button>
+            )
+        }
+    }
+
     if(epoch >= 0) return renderLoadingCard();
     return (
       <g id="umapChart" className="umap chart"
          height={props.height} width={props.width}
-         transform={`translate(${props.margin.x},${props.margin.y})`}/>
+         transform={`translate(${props.margin.x},${props.margin.y})`}>
+          <foreignObject height={100} width={100} transform={`translate(${props.width + 10},${props.height / 2})`}>
+              <SettingsIcon className={"umap settings icon"} fontSize="small"
+                            onClick={() => setOpenSettings(true)}/>
+
+              { renderSettingsDrawer() }
+          </foreignObject>
+      </g>
     );
 }
 
