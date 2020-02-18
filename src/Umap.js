@@ -14,7 +14,6 @@ import {
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import ReplayIcon from '@material-ui/icons/Replay';
 import SettingsIcon from '@material-ui/icons/Settings';
-import {makeStyles} from "@material-ui/styles";
 
 import './Umap.scss'
 
@@ -69,27 +68,6 @@ function Umap(props) {
         setMinDistTemp(minDist);
         setNNeighborsTemp(nNeighbors)
     }
-
-    const classes = makeStyles({
-        alignCenter: {
-            margin: "auto"
-        },
-
-        backgroundLayer: {
-            display: 'grid',
-            height: props.height,
-            width: props.width
-        },
-
-        backgroundPaper: {
-            alignItems: 'center',
-            display: 'grid',
-            height: 3*props.height/5,
-            justifyItems: 'center',
-            margin: 0,
-            width: props.width/2
-        }
-    })();
 
     function mergeClusters(datasetReduced) {
         for(let i = 0; i < datasetReduced.length; i++) {
@@ -152,25 +130,29 @@ function Umap(props) {
         drawUmap();
     }, [minDist, nNeighbors]);
 
-    // TODO: improve loading card
     function renderLoadingCard() {
         return (
           <foreignObject height={props.height} width={props.width}
                          transform={`translate(${props.margin.x},${props.margin.y})`}>
-              <Grid className={classes.backgroundLayer} alignItems='center' justify='center'>
-                  <Paper className={classes.backgroundPaper}>
-                      <LinearProgress className="umap progress epoch" variant="determinate"
-                                      value={parseInt(epoch / nEpochs * 100)}/>
+              <Grid container className="umap loading background" alignItems="center" justify="center">
+                  <Paper className="umap loading paper">
+                      <Grid container className="umap loading background"
+                            alignItems="center" direction="column" justify="center">
+                          <Grid item className="umap loading progress-background">
+                              <LinearProgress className="umap loading progress" variant="determinate"
+                                              value={parseInt(epoch / nEpochs * 100)}/>
+                          </Grid>
 
-                      <span>
-                          <Typography variant='h5' display={'inline'}>
-                              Epoch {epoch}
-                          </Typography>
+                          <Grid container item alignItems="baseline" justify="center">
+                              <Typography variant='h5' display="inline">
+                                  Epoch {epoch}
+                              </Typography>
 
-                          <Typography display={'inline'}>
-                              /{ nEpochs }
-                          </Typography>
-                      </span>
+                              <Typography display="contents">
+                                  /{ nEpochs }
+                              </Typography>
+                          </Grid>
+                      </Grid>
                   </Paper>
               </Grid>
           </foreignObject>
@@ -180,7 +162,7 @@ function Umap(props) {
     function renderSettingsDrawer() {
         return (
           <Drawer anchor="bottom" open={openSettings} onClose={onSettingsClose}>
-              <Grid container className="umap settings container">
+              <Grid container className="umap settings container" alignItems="center">
                   <Typography variant="h5" className="umap settings min-dist header">
                       minDist
                   </Typography>

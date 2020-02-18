@@ -4,16 +4,34 @@
     stroke-width: 0;
   }
 
-  &.progress.epoch {
-    margin-left: 25px;
-    margin-right: 25px;
-    width: -moz-available;
-    width: -webkit-fill-available;
+
+  &.loading {
+    &.background {
+      height: 100%;
+      row-gap: 30px;
+      width: 100%;
+    }
+
+    &.paper{
+      height: 60%;
+      width: 50%;
+    }
+
+    &.progress {
+      margin-left: 25px;
+      margin-right: 25px;
+      width: -webkit-fill-available;
+      width: -moz-available;
+    }
+
+    &.progress-background {
+      width: 100%;
+    }
   }
+
 
   &.settings {
     &.container {
-      align-items: center;
       display: grid;
       grid-column-gap: 20px;
       grid-row-gap: 15px;
@@ -23,6 +41,10 @@
       width: inherit;
     }
 
+    &.header {
+      grid-column: 1;
+    }
+
     &.icon {
       opacity: 0.5;
       transition: opacity 0.5s;
@@ -30,10 +52,6 @@
       &:hover {
         opacity: 1;
       }
-    }
-
-    &.header {
-      grid-column: 1;
     }
 
     &.min-dist {
