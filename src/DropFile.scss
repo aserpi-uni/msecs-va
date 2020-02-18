@@ -1,0 +1,28 @@
+.drop-files {
+  &.backdrop {
+    z-index: 1;
+  }
+
+
+  &.background-paper {
+    height: 275px;
+    row-gap: 30px;
+    width: 640px;
+  }
+
+
+  &.folder-icon {
+    color: white;
+    font-size: 3.5rem;
+  }
+
+
+  &.foreground-paper {
+    align-items: center;
+    background-color: #ffab00;
+    display: grid;
+    height: 100px;
+    justify-items: center;
+    width: 600px;
+  }
+}

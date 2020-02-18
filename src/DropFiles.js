@@ -10,7 +10,8 @@ import {
 import CreteNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import FolderIcon from '@material-ui/icons/Folder';
 import {Alert, AlertTitle} from '@material-ui/lab'
-import {makeStyles} from "@material-ui/styles";
+
+import './DropFile.scss'
 
 
 function parseFiles(files) {
@@ -49,46 +50,6 @@ function DropFiles(props){
     const [dragging, setDragging] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [snackbar, setSnackbar] = useState(false);
-
-    const classes = makeStyles({
-        backdrop: {
-            zIndex: 1
-        },
-
-        backgroundLayer: {
-            height: props.height,
-            width: props.width
-        },
-
-        bigIcon: {
-            color: "#fff",
-            fontSize: "3.5rem"
-        },
-
-        dropLayer: {
-            height: "inherit",
-            padding: 0,
-            width: "inherit"
-        },
-
-        dropPaper: {
-            alignItems: "center",
-            backgroundColor: "#ffab00",
-            display: "grid",
-            height: 100,
-            justifyItems: "center",
-            width: 600
-        },
-
-        paddedGidItem: {
-            paddingTop: 30,
-        },
-
-        paperLayer: {
-            height: 275,
-            width: 640
-        }
-    })();
 
     async function onDrag(e) {
         e.preventDefault();
@@ -153,35 +114,42 @@ function DropFiles(props){
     }
 
     function folderIcon() {
-        if(dragging) return <CreteNewFolderIcon className={classes.bigIcon} />;
-        else return <FolderIcon className={classes.bigIcon} />
+        if(dragging) return <CreteNewFolderIcon className="drop-files folder-icon"/>;
+        else return <FolderIcon className="drop-files folder-icon"/>
     }
 
     return (
-      <Grid container className={classes.backgroundLayer} alignItems="center" justify="center">
-          <Paper className={classes.paperLayer}>
-              <Grid container className={classes.paperLayer}
+      <Grid container className="drop-files parametric-dimensions" alignItems="center" justify="center"
+            style={{height: props.height, width: props.width}}>
+          <Paper className="drop-files background-paper">
+              <Grid container className="drop-files background-paper"
                     alignItems="center" direction="column" justify="center">
-                  <Grid>
+                  <Grid item>
                       <Typography variant="h3">
                           Drop your files on this box
                       </Typography>
                   </Grid>
-                  <Grid item className={classes.paddedGidItem}>
-                      <Paper className={classes.dropPaper} color="#ffab00"
+
+                  <Grid item>
+                      <Paper className="drop-files foreground-paper"
                              onDragOver={onDrag} onDrop={onDrop}>
                           { folderIcon() }
                       </Paper>
                   </Grid>
               </Grid>
           </Paper>
-          <Backdrop className={classes.backdrop} open={backdrop}>
+
+          <Backdrop className="drop-files backdrop" open={backdrop}>
               <CircularProgress/>
           </Backdrop>
+
           <Snackbar anchorOrigin={{ horizontal: "center", vertical: "top" }} autoHideDuration={6000}
                     onClose={() => setSnackbar(false)} open={snackbar}>
               <Alert severity="error">
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>
+                      Error
+                  </AlertTitle>
+
                   {errorMessage}
               </Alert>
           </Snackbar>
