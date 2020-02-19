@@ -75,8 +75,21 @@ function Elbow(props) {
             .attr("r", 5)
             .on("mouseover", tip.show)
             .on("mouseout", tip.hide)
-            .on("click", onDotClick)
     }, []);
+
+    useEffect(function() {
+        const dots = d3.selectAll(".elbow.dot-k");
+
+        if(props.busy) {
+            dots
+              .style("cursor", "no-drop")
+              .on("click", undefined)
+        } else {
+            dots
+              .style("cursor", "pointer")
+              .on("click",  onDotClick)
+        }
+    }, [props.busy]);
 
     return (
       <g id="elbowChart" className="elbow chart"

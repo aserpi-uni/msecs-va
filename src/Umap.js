@@ -76,6 +76,7 @@ function Umap(props) {
     }
 
     async function drawUmap() {
+        props.setBusy(true);
         const datasetReducedTemp = await new UMAP({
             distanceFn: props.distance,
             minDist: minDist,
@@ -115,6 +116,7 @@ function Umap(props) {
           .attr("cy", d => yScale(d[1]))
           .attr("r", 3)
           .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
+        props.setBusy(false);
     }
 
     useEffect(function() {

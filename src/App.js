@@ -15,6 +15,7 @@ class App extends React.Component {
         super(props);
 
         this.state = {
+            busy: 0,
             colorScale: d3.scaleOrdinal(d3.schemeCategory10),
             centroids: undefined,
             clusters: undefined,
@@ -44,14 +45,22 @@ class App extends React.Component {
               <Elbow height={commonHeight} width={firstRowWidth} margin={margin}
                      centroids={this.state.centroids} clusters={this.state.clusters}
                      dataset={this.state.dataset}
-                     onRunChange={this.updateFromElbow()}/>
+                     busy={this.state.busy} onRunChange={this.updateFromElbow()}/>
 
               <Umap height={commonHeight} margin={umapMargin} width={firstRowWidth}
                     clusters={this.state.clusters[this.state.currentRun]} dataset={this.state.dataset}
                     colorScale={this.state.colorScale} distance={distance}
-                    minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}/>
+                    minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
+                    setBusy={this.setBusy()}/>
           </svg>
         )
+    }
+
+    setBusy() {
+        const component = this;
+        return function(busy) {
+            component.setState(prevState => ({busy: prevState.busy + (busy ? 1 : -1)}));
+        }
     }
 
     getDataset() {
