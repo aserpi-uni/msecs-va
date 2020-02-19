@@ -1,12 +1,5 @@
 import React, {useState} from 'react';
-import {
-    Backdrop,
-    CircularProgress,
-    Grid,
-    Paper,
-    Snackbar,
-    Typography
-} from "@material-ui/core";
+import {Backdrop, CircularProgress, Grid, Paper, Snackbar, Typography} from "@material-ui/core";
 import CreteNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import FolderIcon from '@material-ui/icons/Folder';
 import {Alert, AlertTitle} from '@material-ui/lab'
@@ -15,19 +8,16 @@ import './DropFile.scss'
 
 
 function parseFiles(files) {
-    let datasetFile = undefined;
+    let datasetFile;
     const runFiles = [];
 
     for(const f of files) {
         if(! f.isFile) continue;
-        if (f.name === "dataset.csv") datasetFile = f;
-        else if (f.name.endsWith(".csv")) runFiles.push(f);
+        if(f.name === "dataset.csv") datasetFile = f;
+        else if(f.name.endsWith(".csv")) runFiles.push(f);
     }
 
-    return {
-        datasetFile: datasetFile,
-        runFiles: runFiles
-    }
+    return {datasetFile, runFiles}
 }
 
 
@@ -36,6 +26,7 @@ function parseFiles(files) {
 // e.g. Chrome returns at most 100 entries at a time
 async function readEntriesPromise(directoryReader) {
     try {
+        // return-await is not redundant because it is in a try-catch block
         return await new Promise((resolve, reject) => {
             directoryReader.readEntries(resolve, reject);
         });
@@ -64,53 +55,41 @@ function DropFiles(props){
         let datasetFile, runFiles;
 
         if(e.dataTransfer.items.length > 1) {
-            const files = [];
-            for(let i = 0; i < e.dataTransfer.items.length; i++) {
-                files.push(e.dataTransfer.items[i].webkitGetAsEntry());
-            }
-            const ret = parseFiles(files);
-            datasetFile = ret.datasetFile;
-            runFiles = ret.runFiles
+            const files = [...e.dataTransfer.items].map(f => f.webkitGetAsEntry());
+            ({datasetFile, runFiles} = parseFiles(files));
         }
 
         else {
             const directory = e.dataTransfer.items[0].webkitGetAsEntry();
             if(! directory.isDirectory) {
-                setDragging(false);
-                setErrorMessage("The file is not a directory!");
-                setSnackbar(true);
-                setBackdrop(false);
+                uploadError("The file is not a directory!");
                 return;
             }
 
-            else {
-                const directoryReader = directory.createReader(),
-                  files = [];
-                let readEntries = await readEntriesPromise(directoryReader);
-                while (readEntries.length > 0) {
-                    files.push(...readEntries);
-                    readEntries = await readEntriesPromise(directoryReader);
-                }
-                const ret = parseFiles(files);
-                datasetFile = ret.datasetFile;
-                runFiles = ret.runFiles
+            const directoryReader = directory.createReader(),
+              files = [];
+            let readEntries = await readEntriesPromise(directoryReader);
+            while (readEntries.length > 0) {
+                files.push(...readEntries);
+                readEntries = await readEntriesPromise(directoryReader);
             }
+            ({datasetFile, runFiles} = parseFiles(files));
         }
 
         setDragging(false);
-        if(datasetFile === undefined) {
-            setBackdrop(false);
-            setErrorMessage("No dataset file!");
-            setSnackbar(true);
-        } else if(runFiles === undefined || runFiles.length < 2) {
-            setBackdrop(false);
-            setErrorMessage("Not enough run files!");
-            setSnackbar(true)
-        } else{
+        if(datasetFile === undefined) uploadError("No dataset file!");
+        else if(! runFiles || runFiles.length < 2) uploadError("Not enough run files!");
+        else {
             props.onDroppedFiles(runFiles.length);
             datasetFile.file(props.datasetCallback);
             runFiles.forEach(runFile => runFile.file(props.runCallback));
         }
+    }
+
+    function uploadError(msg) {
+        setBackdrop(false);
+        setErrorMessage(msg);
+        setSnackbar(true);
     }
 
     function folderIcon() {
