@@ -62,8 +62,8 @@ class App extends React.Component {
                 clusters: clusters,
                 dataset: dataset,
                 umap: {
-                    minDist: (config.umap && config.umap.minDist) || 0.1,
-                    nNeighbors: (config.umap && config.umap.nNeighbors) || 15
+                    minDist: (config.umap && config.umap.minDist),
+                    nNeighbors: (config.umap && config.umap.nNeighbors)
                 }
             })
         }

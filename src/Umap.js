@@ -36,10 +36,10 @@ nNeighborsMarks.push({label: "15", value: 15});
 function Umap(props) {
     const [datasetReduced, setDatasetReduced] = useState([]);
     const [epoch, setEpoch] = useState(-1);
-    const [minDist, setMinDist] = useState(props.minDist);
-    const [minDistTemp, setMinDistTemp] = useState(props.minDist);
-    const [nNeighbors, setNNeighbors] = useState(props.nNeighbors);
-    const [nNeighborsTemp, setNNeighborsTemp] = useState(props.nNeighbors);
+    const [minDist, setMinDist] = useState(props.minDist || 0.1);
+    const [minDistTemp, setMinDistTemp] = useState(props.minDist || 0.1);
+    const [nNeighbors, setNNeighbors] = useState(props.nNeighbors || 15);
+    const [nNeighborsTemp, setNNeighborsTemp] = useState(props.nNeighbors || 15);
     const [openSettings, setOpenSettings] = useState(false);
 
     function onMinDistChange(e, v) {
