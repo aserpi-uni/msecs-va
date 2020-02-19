@@ -3,9 +3,7 @@ import * as d3 from 'd3'
 
 // General objects
 
-const categoricalFeatures = ["f0", "f1", "f3", "f7"],
-  numericalFeatures = ["f2", "f4", "f5", "f6"],
-  gamma = 0.14;
+let categoricalFeatures, numericalFeatures, gamma;
 
 
 // A weighted Heterogeneous Euclidean-Overlap Metric (HEOM)
@@ -16,6 +14,13 @@ function distance(d1, d2) {
     numericalFeatures.forEach(f => totalDistance += (d1[f] - d2[f])**2);
 
     return Math.sqrt(totalDistance)
+}
+
+
+function init(catFeatures, numFeatures, g) {
+    categoricalFeatures = catFeatures;
+    numericalFeatures = numFeatures;
+    gamma = g;
 }
 
 
@@ -76,4 +81,4 @@ function computeVariance(dataset, labels, k) {
 }
 
 
-export { computeSse, computeVariance ,distance, parseDatasetElement }
+export { computeSse, computeVariance, distance, init, parseDatasetElement }

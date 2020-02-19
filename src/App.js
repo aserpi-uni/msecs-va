@@ -6,7 +6,7 @@ import './App.scss';
 import DropFiles from "./DropFiles";
 import Elbow from "./Elbow";
 import Umap from "./Umap";
-import {distance, parseDatasetElement} from "./utils";
+import {distance} from "./utils";
 
 
 // TODO: use an alternative id method than HTML id
@@ -16,15 +16,11 @@ class App extends React.Component {
 
         this.state = {
             colorScale: d3.scaleOrdinal(d3.schemeCategory10),
-            centroids: {},
-            clusters: {},
+            centroids: undefined,
+            clusters: undefined,
             currentRun: -1,
             dataset: undefined,
-            umap: {
-                nNeighbors: 15,
-                minDist: 0.1,
-            },
-            numRuns: 0
+            umap: undefined
         }
     }
 
@@ -33,12 +29,8 @@ class App extends React.Component {
         const h = document.documentElement.clientHeight - 4,
           w = document.documentElement.clientWidth;
 
-        if(this.state.dataset && this.state.numRuns === 0) return this.renderApp(w, h);
-        return (
-          <DropFiles height={h} width={w}
-                     datasetCallback={this.parseDatasetFile()} onDroppedFiles={this.setNumRuns()}
-                     runCallback={this.parseRunFile()}/>
-          )
+        if(this.state.dataset) return this.renderApp(w, h);
+        return <DropFiles height={h} width={w} callback={this.getDataset()}/>
     }
 
     renderApp(width, height) {
@@ -62,30 +54,18 @@ class App extends React.Component {
         )
     }
 
-    setNumRuns() {
+    getDataset() {
         const component = this;
-        return n => component.setState(prevState => ({numRuns: prevState.numRuns + n}))
-    }
-
-    parseDatasetFile() {
-        const component = this;
-        return async function(datasetFile) {
+        return function(config, centroids, clusters, dataset) {
             component.setState({
-                dataset: d3.csvParse(await datasetFile.text(), parseDatasetElement)
+                centroids: centroids,
+                clusters: clusters,
+                dataset: dataset,
+                umap: {
+                    minDist: (config.umap && config.umap.minDist) || 0.1,
+                    nNeighbors: (config.umap && config.umap.nNeighbors) || 15
+                }
             })
-        }
-    }
-
-    parseRunFile() {
-        const component = this;
-        return async function (runFile) {
-            const m = runFile.name.match(/(centroids|clusters)_(\d+)\.csv/);
-            if(m && m[1] === "centroids") {
-                component.state.centroids[m[2]] = d3.csvParse(await  runFile.text(), parseDatasetElement)
-            } else if(m && m[1] === "clusters") {
-                component.state.clusters[m[2]] = d3.csvParseRows(await runFile.text(), c => +c[0])
-            }
-            component.setState(prevState => ({ numRuns: prevState.numRuns - 1}))
         }
     }
 

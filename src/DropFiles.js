@@ -1,23 +1,31 @@
-import React, {useState} from 'react';
+import * as d3 from 'd3'
 import {Backdrop, CircularProgress, Grid, Paper, Snackbar, Typography} from "@material-ui/core";
 import CreteNewFolderIcon from '@material-ui/icons/CreateNewFolder';
 import FolderIcon from '@material-ui/icons/Folder';
 import {Alert, AlertTitle} from '@material-ui/lab'
+import React, {useState} from 'react';
 
 import './DropFile.scss'
+import {init, parseDatasetElement} from "./utils";
 
 
-function parseFiles(files) {
-    let datasetFile;
+async function convertFilePromise(webkitEntry) {
+    return new Promise(resolve => webkitEntry.file(resolve))
+}
+
+
+function selectFiles(files) {
+    let configurationFile, datasetFile;
     const runFiles = [];
 
     for(const f of files) {
         if(! f.isFile) continue;
         if(f.name === "dataset.csv") datasetFile = f;
+        else if(f.name === "dataset.json") configurationFile = f;
         else if(f.name.endsWith(".csv")) runFiles.push(f);
     }
 
-    return {datasetFile, runFiles}
+    return {configurationFile, datasetFile, runFiles}
 }
 
 
@@ -52,11 +60,11 @@ function DropFiles(props){
         e.preventDefault();
         e.stopPropagation();
         setBackdrop(true);
-        let datasetFile, runFiles;
+        let configurationFile, datasetFile, runFiles;
 
         if(e.dataTransfer.items.length > 1) {
             const files = [...e.dataTransfer.items].map(f => f.webkitGetAsEntry());
-            ({datasetFile, runFiles} = parseFiles(files));
+            ({configurationFile, datasetFile, runFiles} = selectFiles(files));
         }
 
         else {
@@ -73,16 +81,56 @@ function DropFiles(props){
                 files.push(...readEntries);
                 readEntries = await readEntriesPromise(directoryReader);
             }
-            ({datasetFile, runFiles} = parseFiles(files));
+            ({configurationFile, datasetFile, runFiles} = selectFiles(files));
         }
 
         setDragging(false);
-        if(datasetFile === undefined) uploadError("No dataset file!");
+        if(configurationFile === undefined) uploadError("No configuration file");
+        else if(datasetFile === undefined) uploadError("No dataset file!");
         else if(! runFiles || runFiles.length < 2) uploadError("Not enough run files!");
+        else parseFiles(configurationFile, datasetFile, runFiles);
+    }
+
+    async function parseFiles(configurationFile, datasetFile, runFiles) {
+        // File promises
+        let centroidPromises = {},
+          configurationPromise = convertFilePromise(configurationFile),
+          datasetPromise = convertFilePromise(datasetFile),
+          labelPromises = {};
+        for(let f of runFiles) {
+            const m = f.name.match(/^(centroids|clusters)_(\d+).csv$/);
+            if(m && m[1] === "centroids") centroidPromises[m[2]] = convertFilePromise(f);
+            else if(m && m[1] === "clusters") labelPromises[m[2]] = convertFilePromise(f)
+        }
+
+        // String promises
+        configurationPromise = (await configurationPromise).text();
+        datasetPromise = (await datasetPromise).text();
+        const completeRuns = [];
+        for(const k of Object.keys(centroidPromises)) {
+            // Take only runs that have both centroids and labels
+            if(labelPromises[k] === undefined) continue;
+            completeRuns.push(k);
+            centroidPromises[k] = (await centroidPromises[k]).text();
+            labelPromises[k] = (await labelPromises[k]).text()
+        }
+
+        // Text parsing
+        const config = JSON.parse(await configurationPromise);
+        if(! config.gamma) uploadError("No gamma in configuration file!");
+        else if(! config.categoricalFeatures) uploadError("No categorical features specified!");
+        else if(! config.numericalFeatures) uploadError("No numerical features specified!");
         else {
-            props.onDroppedFiles(runFiles.length);
-            datasetFile.file(props.datasetCallback);
-            runFiles.forEach(runFile => runFile.file(props.runCallback));
+            init(config.categoricalFeatures, config.numericalFeatures, config.gamma);
+            const centroids = {},
+              labels = {};
+            for(const k of completeRuns) {
+                centroids[k] = d3.csvParse(await centroidPromises[k], parseDatasetElement);
+                labels[k] = d3.csvParseRows(await labelPromises[k], d => +d)
+            }
+            const dataset = d3.csvParse(await datasetPromise, parseDatasetElement);
+
+            props.callback(config, centroids, labels, dataset)
         }
     }
 
