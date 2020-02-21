@@ -211,30 +211,21 @@ function Umap(props) {
                          value={nNeighborsTemp} onChange={onNNeighborsChange}/>
 
                   <div className="umap settings run">
-                      { renderSettingsRunButton() }
+                      {
+                          minDistTemp === minDist && nNeighborsTemp === nNeighbors ?
+                            <Button variant="contained" size="large" startIcon={<ReplayIcon/>}
+                                    onClick={onRepeatClicked}>
+                                Re-run
+                            </Button> :
+                            <Button variant="contained" size="large"
+                                    startIcon={<PlayArrowIcon/>} onClick={onRunClicked}>
+                                Run
+                            </Button>
+                      }
                   </div>
               </Grid>
           </Drawer>
         )
-    }
-
-    function renderSettingsRunButton() {
-        if(minDistTemp === minDist && nNeighborsTemp === nNeighbors) {
-            return (
-              <Button variant="contained" size="large"
-                      startIcon={<ReplayIcon/>} onClick={onRepeatClicked}>
-                  Re-run
-              </Button>
-            )
-        }
-        else {
-            return (
-              <Button variant="contained" size="large"
-                      startIcon={<PlayArrowIcon/>} onClick={onRunClicked}>
-                  Run
-              </Button>
-            )
-        }
     }
 
     return (
