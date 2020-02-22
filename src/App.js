@@ -19,9 +19,9 @@ class App extends React.Component {
             busy: 0,
             colorScale: d3.scaleOrdinal(d3.schemeCategory10),
             centroids: undefined,
-            clusters: undefined,
             currentRun: -1,
             dataset: undefined,
+            labels: undefined,
             umap: undefined
         }
     }
@@ -43,12 +43,12 @@ class App extends React.Component {
         return (
           <Grid id="base" style={{height, width}}>
               <Elbow height={commonHeight} padding={padding} width={firstRowWidth}
-                     centroids={this.state.centroids} clusters={this.state.clusters}
-                     dataset={this.state.dataset}
+                     centroids={this.state.centroids} dataset={this.state.dataset}
+                     labels={this.state.labels}
                      busy={this.state.busy} onRunChange={this.updateFromElbow()}/>
 
               <Umap height={commonHeight} padding={padding} width={firstRowWidth}
-                    clusters={this.state.clusters[this.state.currentRun]} dataset={this.state.dataset}
+                    dataset={this.state.dataset} labels={this.state.labels[this.state.currentRun]}
                     colorScale={this.state.colorScale} distance={distance}
                     minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
                     setBusy={this.setBusy()}/>
@@ -65,11 +65,11 @@ class App extends React.Component {
 
     getDataset() {
         const component = this;
-        return function(config, centroids, clusters, dataset) {
+        return function(config,  dataset, centroids, labels) {
             component.setState({
                 centroids: centroids,
-                clusters: clusters,
                 dataset: dataset,
+                labels: labels,
                 umap: {
                     minDist: (config.umap && config.umap.minDist),
                     nNeighbors: (config.umap && config.umap.nNeighbors)

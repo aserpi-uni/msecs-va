@@ -69,9 +69,9 @@ function Umap(props) {
         setNNeighborsTemp(nNeighbors)
     }
 
-    function mergeClusters(datasetReduced) {
+    function mergeLabels(datasetReduced) {
         for(let i = 0; i < datasetReduced.length; i++) {
-            datasetReduced[i][2] = props.clusters[i];
+            datasetReduced[i][2] = props.labels[i];
         }
     }
 
@@ -83,7 +83,7 @@ function Umap(props) {
             nEpochs: nEpochs,
             nNeighbors: nNeighbors})
           .fitAsync(props.dataset, setEpoch);
-        if(props.clusters !== undefined) mergeClusters(datasetReducedTemp);
+        if(props.labels !== undefined) mergeLabels(datasetReducedTemp);
         setDatasetReduced(datasetReducedTemp);
         setEpoch(-1);
 
@@ -144,13 +144,13 @@ function Umap(props) {
     }
 
     useEffect(function() {
-        if(props.clusters === undefined) return;
-        mergeClusters(datasetReduced);
+        if(props.labels === undefined) return;
+        mergeLabels(datasetReduced);
 
         d3.selectAll(".umap.dot")
           .transition(d3.transition().duration(750))
           .style("fill", d => props.colorScale(d[2]))
-    }, [props.clusters]);
+    }, [props.labels]);
 
     useEffect( function() {
         drawUmap();

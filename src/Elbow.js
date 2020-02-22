@@ -23,12 +23,12 @@ function Elbow(props) {
           w = props.width,
           metrics = [];
 
-        for(let k of Object.keys(props.clusters)) {
+        for(let k of Object.keys(props.labels)) {
             k = +k;
             metrics.push({
                 k: k,
-                //metric: computeVariance(props.dataset, props.clusters[k], k)
-                metric: computeSse(props.dataset, props.clusters[k], props.centroids[k])
+                //metric: computeVariance(props.dataset, props.labels[k], k)
+                metric: computeSse(props.dataset, props.labels[k], props.centroids[k])
             })
         }
 

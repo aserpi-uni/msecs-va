@@ -98,9 +98,9 @@ function DropFiles(props){
           datasetPromise = convertFilePromise(datasetFile),
           labelPromises = {};
         for(let f of runFiles) {
-            const m = f.name.match(/^(centroids|clusters)_(\d+).csv$/);
+            const m = f.name.match(/^(centroids|labels)_(\d+).csv$/);
             if(m && m[1] === "centroids") centroidPromises[m[2]] = convertFilePromise(f);
-            else if(m && m[1] === "clusters") labelPromises[m[2]] = convertFilePromise(f)
+            else if(m && m[1] === "labels") labelPromises[m[2]] = convertFilePromise(f)
         }
 
         // String promises
@@ -130,7 +130,7 @@ function DropFiles(props){
             }
             const dataset = d3.csvParse(await datasetPromise, parseDatasetElement);
 
-            props.callback(config, centroids, labels, dataset)
+            props.callback(config, dataset, centroids, labels)
         }
     }
 
