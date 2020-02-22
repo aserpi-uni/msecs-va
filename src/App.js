@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import {Grid} from '@material-ui/core'
 import React from 'react';
 import 'typeface-roboto';
 
@@ -35,24 +36,23 @@ class App extends React.Component {
     }
 
     renderApp(width, height) {
-        const margin = {x: 50, y: 50, intra: 50},
-          commonHeight = (height- 2*margin.y - margin.intra) / 2,
-          firstRowWidth = (width - 2*margin.x - 2*margin.intra) / 3,
-          umapMargin = {x: margin.x + 2*firstRowWidth + 2*margin.intra, y: margin.intra};
+        const padding = {x: 50, y: 50},
+          commonHeight = (height - 3*padding.y) / 2,
+          firstRowWidth = (width - 6*padding.x) / 3;
 
         return (
-          <svg id="baseSvg" height={height} width={width}>
-              <Elbow height={commonHeight} width={firstRowWidth} margin={margin}
+          <Grid id="base" style={{height, width}}>
+              <Elbow height={commonHeight} padding={padding} width={firstRowWidth}
                      centroids={this.state.centroids} clusters={this.state.clusters}
                      dataset={this.state.dataset}
                      busy={this.state.busy} onRunChange={this.updateFromElbow()}/>
 
-              <Umap height={commonHeight} margin={umapMargin} width={firstRowWidth}
+              <Umap height={commonHeight} padding={padding} width={firstRowWidth}
                     clusters={this.state.clusters[this.state.currentRun]} dataset={this.state.dataset}
                     colorScale={this.state.colorScale} distance={distance}
                     minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
                     setBusy={this.setBusy()}/>
-          </svg>
+          </Grid>
         )
     }
 

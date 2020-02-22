@@ -92,19 +92,22 @@ function Elbow(props) {
     }, [props.busy]);
 
     return (
-      <g id="elbowChart" className="elbow chart"
-         height={props.height} width={props.width}
-         transform={`translate(${props.margin.x},${props.margin.y})`}>
-          <text className="elbow axis label x"
-                transform={`translate(${props.width/2},${props.height+2*props.margin.y/3})`}>
-              Number of clusters
-          </text>
+      <svg id="baseElbowChart" className="elbow chart"
+           height={props.height + 2*props.padding.y} width={props.width + 2*props.padding.x}>
+          <g id="elbowChart" className="elbow chart"
+             height={props.height} width={props.width}
+             transform={`translate(${props.padding.x},${props.padding.y})`}>
+              <text className="elbow axis label x"
+                    transform={`translate(${props.width/2},${props.height+3*props.padding.y/4})`}>
+                  Number of clusters
+              </text>
 
-          <text className="elbow axis label y"
-                transform={`translate(-${2*props.margin.x/3},${props.height/2}),rotate(-90)`}>
-              Sum of squared errors
-          </text>
-      </g>
+              <text className="elbow axis label y"
+                    transform={`translate(-${2*props.padding.x/3},${props.height/2}),rotate(-90)`}>
+                  Sum of squared errors
+              </text>
+          </g>
+      </svg>
     )
 }
 

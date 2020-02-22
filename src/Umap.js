@@ -135,7 +135,7 @@ function Umap(props) {
     function renderLoadingCard() {
         return (
           <foreignObject height={props.height} width={props.width}
-                         transform={`translate(${props.margin.x},${props.margin.y})`}>
+                         transform={`translate(${props.padding.x},${props.padding.y})`}>
               <Grid container className="umap loading background" alignItems="center" justify="center">
                   <Paper className="umap loading paper">
                       <Grid container className="umap loading background"
@@ -158,6 +158,25 @@ function Umap(props) {
                   </Paper>
               </Grid>
           </foreignObject>
+        )
+    }
+
+    function renderUmapChart() {
+        return (
+          <g>
+              <g id="umapChart" className="umap chart"
+                 height={props.height} width={props.width}
+                 transform={`translate(${props.padding.x},${props.padding.y})`}/>
+
+                 <foreignObject height={100} width={100}
+                                transform={`translate(${props.width + props.padding.x + 10},
+                                ${props.padding.y + props.height/2})`}>
+                     <SettingsIcon className={"umap settings icon"} fontSize="small"
+                                   onClick={() => setOpenSettings(true)}/>
+
+                  { renderSettingsDrawer() }
+              </foreignObject>
+          </g>
         )
     }
 
@@ -218,18 +237,11 @@ function Umap(props) {
         }
     }
 
-    if(epoch >= 0) return renderLoadingCard();
     return (
-      <g id="umapChart" className="umap chart"
-         height={props.height} width={props.width}
-         transform={`translate(${props.margin.x},${props.margin.y})`}>
-          <foreignObject height={100} width={100} transform={`translate(${props.width + 10},${props.height / 2})`}>
-              <SettingsIcon className={"umap settings icon"} fontSize="small"
-                            onClick={() => setOpenSettings(true)}/>
-
-              { renderSettingsDrawer() }
-          </foreignObject>
-      </g>
+      <svg id="baseUmapChart"
+           height={props.height + 2*props.padding.y} width={props.width + 2*props.padding.x}>
+          { epoch >= 0 ? renderLoadingCard() : renderUmapChart() }
+      </svg>
     );
 }
 
