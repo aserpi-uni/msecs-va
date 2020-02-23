@@ -18,6 +18,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import './Umap.scss'
 
 
+const maxZoom = 20;
 const minDistMarks = [...Array(9).keys()].map(function(x) {
     x = (x + 1) / 10;
     return { label: x.toString(), value: x }
@@ -92,6 +93,9 @@ function Umap(props) {
           h = props.height,
           w = props.width;
 
+        const rScale = d3.scaleLinear()
+          .domain([1, maxZoom])
+          .range([3, 10]);
         const xScale = d3.scaleLinear()
           .domain(d3.extent(datasetReducedTemp, v => v[0])).nice()
           .range([0, w]);
@@ -121,7 +125,7 @@ function Umap(props) {
         props.setBusy(false);
 
         const zoom = d3.zoom()
-          .scaleExtent([1, 20])
+          .scaleExtent([1, maxZoom])
           .on("zoom", zoomed);
         d3.select("#rootUmapChart")
           .call(zoom);
@@ -139,7 +143,8 @@ function Umap(props) {
 
             svg.selectAll(".umap.dot")
               .attr("cx", d => newXScale(d[0]))
-              .attr("cy", d => newYScale(d[1]));
+              .attr("cy", d => newYScale(d[1]))
+              .attr("r", () => rScale(t.k));
         }
     }
 
