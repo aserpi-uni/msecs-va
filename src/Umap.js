@@ -87,26 +87,28 @@ function Umap(props) {
         setDatasetReduced(datasetReducedTemp);
         setEpoch(-1);
 
-        const svg = d3.select('#umapChart'),
+        const baseSvg = d3.select("#baseUmapChart"),
+          svg = d3.select('#umapChart'),
           h = props.height,
           w = props.width;
 
         const xScale = d3.scaleLinear()
-          .domain([d3.min(datasetReducedTemp, v => v[0]), d3.max(datasetReducedTemp, v => v[0])])
+          .domain(d3.extent(datasetReducedTemp, v => v[0])).nice()
           .range([0, w]);
-
         const yScale = d3.scaleLinear()
-          .domain([d3.min(datasetReducedTemp, v => v[1]), d3.max(datasetReducedTemp, v => v[1])])
+          .domain(d3.extent(datasetReducedTemp, v => v[1])).nice()
           .range([h, 0]);
 
-        svg.append("g")
+        const xAxis = d3.axisBottom(xScale);
+        const yAxis = d3.axisLeft(yScale);
+
+        const gX = baseSvg.append("g")
           .attr("class", "umap axis x")
           .attr("transform", `translate(0, ${h})`)
-          .call(d3.axisBottom(xScale));
-
-        svg.append("g")
+          .call(xAxis);
+        const gY = baseSvg.append("g")
           .attr("class", "umap axis y")
-          .call(d3.axisLeft(yScale));
+          .call(yAxis);
 
         svg.selectAll(".umap.dot")
           .data(datasetReducedTemp)
@@ -117,6 +119,28 @@ function Umap(props) {
           .attr("r", 3)
           .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
         props.setBusy(false);
+
+        const zoom = d3.zoom()
+          .scaleExtent([1, 20])
+          .on("zoom", zoomed);
+        d3.select("#rootUmapChart")
+          .call(zoom);
+
+        function zoomed() {
+            const t = d3.event.transform;
+            t.x = Math.min(0, Math.max(t.x, (1 - t.k) * props.width));
+            t.y = Math.min(0, Math.max(t.y, (1 - t.k) * props.height));
+
+            const newXScale = d3.event.transform.rescaleX(xScale),
+              newYScale = d3.event.transform.rescaleY(yScale);
+
+            gX.call(xAxis.scale(newXScale));
+            gY.call(yAxis.scale(newYScale));
+
+            svg.selectAll(".umap.dot")
+              .attr("cx", d => newXScale(d[0]))
+              .attr("cy", d => newYScale(d[1]));
+        }
     }
 
     useEffect(function() {
@@ -163,16 +187,24 @@ function Umap(props) {
 
     function renderUmapChart() {
         return (
-          <g>
-              <g id="umapChart" className="umap chart"
-                 height={props.height} width={props.width}
-                 transform={`translate(${props.padding.x},${props.padding.y})`}/>
+          <g id="baseUmapChart"
+             transform={`translate(${props.padding.x},${props.padding.y})`}>
+              <defs>
+                  <clipPath id="umapClipPath">
+                      <rect height={props.height} width={props.width} x={0} y={0}/>
+                  </clipPath>
+              </defs>
 
-                 <foreignObject height={100} width={100}
-                                transform={`translate(${props.width + props.padding.x + 10},
-                                ${props.padding.y + props.height/2})`}>
-                     <SettingsIcon className={"umap settings icon"} fontSize="small"
-                                   onClick={() => setOpenSettings(true)}/>
+              <g id="umapChart" className="umap chart" clipPath="url(#umapClipPath)"/>
+
+              <foreignObject height={props.height} width={props.padding.x}
+                             transform={`translate(${props.width},0)`}>
+                  <Grid container className="umap toolbar" alignItems="center">
+                      <Grid item>
+                          <SettingsIcon className="umap settings icon" fontSize="small"
+                                        onClick={() => setOpenSettings(true)}/>
+                      </Grid>
+                  </Grid>
 
                   { renderSettingsDrawer() }
               </foreignObject>
@@ -229,7 +261,7 @@ function Umap(props) {
     }
 
     return (
-      <svg id="baseUmapChart"
+      <svg id="rootUmapChart"
            height={props.height + 2*props.padding.y} width={props.width + 2*props.padding.x}>
           { epoch >= 0 ? renderLoadingCard() : renderUmapChart() }
       </svg>

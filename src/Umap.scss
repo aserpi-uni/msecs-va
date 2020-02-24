@@ -79,4 +79,11 @@
       grid-column: 2 / 11;
     }
   }
+
+
+  &.toolbar {
+    height: 100%;
+    padding-left: 15px;
+    width: 100%;
+  }
 }
