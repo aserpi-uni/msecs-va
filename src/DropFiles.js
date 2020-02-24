@@ -67,7 +67,7 @@ function DropFiles(props){
             ({configurationFile, datasetFile, runFiles} = selectFiles(files));
         }
 
-        else {
+        else if(e.dataTransfer.items.length === 1) {
             const directory = e.dataTransfer.items[0].webkitGetAsEntry();
             if(! directory.isDirectory) {
                 uploadError("The file is not a directory!");
