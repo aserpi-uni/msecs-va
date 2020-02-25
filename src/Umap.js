@@ -43,6 +43,18 @@ function Umap(props) {
     const [nNeighborsTemp, setNNeighborsTemp] = useState(props.nNeighbors || 15);
     const [openSettings, setOpenSettings] = useState(false);
 
+    function onBackgroundClicked() {
+        // Shift+click on background is almost always a mis-click
+        if(! d3.event.shiftKey) props.updatePermanentSelection("set", new Set([]))
+    }
+
+    function onDotClicked(d, i) {
+        d3.event.stopPropagation();
+
+        if(d3.event.shiftKey) props.updatePermanentSelection("toggle", [i]);
+        else props.updatePermanentSelection("set", new Set([i]));
+    }
+
     function onMinDistChange(e, v) {
         if(v === undefined) v = (e.target.value === '' ? '' : parseFloat(e.target.value));
         setMinDistTemp(v);
@@ -88,7 +100,8 @@ function Umap(props) {
         setDatasetReduced(datasetReducedTemp);
         setEpoch(-1);
 
-        const baseSvg = d3.select("#baseUmapChart"),
+        const rootSvg = d3.select("#rootUmapChart"),
+          baseSvg = d3.select("#baseUmapChart"),
           svg = d3.select('#umapChart'),
           h = props.height,
           w = props.width;
@@ -109,29 +122,41 @@ function Umap(props) {
         const gX = baseSvg.append("g")
           .attr("class", "umap axis x")
           .attr("transform", `translate(0, ${h})`)
+          .on("click", onBackgroundClicked)
           .call(xAxis);
         const gY = baseSvg.append("g")
           .attr("class", "umap axis y")
+          .on("click", onBackgroundClicked)
           .call(yAxis);
 
         svg.selectAll(".umap.dot")
           .data(datasetReducedTemp)
           .enter().append("circle")
           .attr("class", "umap dot")
+          .classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
           .classed("temporary-selection", (d, i) => i === props.temporarySelection)
           .attr("cx", d => xScale(d[0]))
           .attr("cy", d => yScale(d[1]))
           .attr("r", 3)
           .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined)
+          .on("click", onDotClicked)
           .on("mouseenter", (d, i) => props.updateTemporarySelection(i))
           .on("mouseout", () => props.updateTemporarySelection(undefined));
-        props.setBusy(false);
 
         const zoom = d3.zoom()
           .scaleExtent([1, maxZoom])
           .on("zoom", zoomed);
-        d3.select("#rootUmapChart")
+
+        rootSvg
+          .on("click", onBackgroundClicked)
           .call(zoom);
+
+        baseSvg
+          .on("click", () => d3.event.stopPropagation());
+        d3.select("#umapSettingsIcon")
+          .on("click", () => setOpenSettings(true));
+
+        props.setBusy(false);
 
         function zoomed() {
             const t = d3.event.transform;
@@ -159,6 +184,12 @@ function Umap(props) {
           .transition(d3.transition().duration(750))
           .style("fill", d => props.colorScale(d[2]))
     }, [props.labels]);
+
+    useEffect(function() {
+        d3.selectAll(".umap.dot")
+          .classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
+          .classed("temporary-selection", false)
+    }, [props.permanentSelection]);
 
     useEffect(function() {
         d3.selectAll(".umap.dot")
@@ -214,8 +245,8 @@ function Umap(props) {
                              transform={`translate(${props.width},0)`}>
                   <Grid container className="umap toolbar" alignItems="center">
                       <Grid item>
-                          <SettingsIcon className="umap settings icon" fontSize="small"
-                                        onClick={() => setOpenSettings(true)}/>
+                          <SettingsIcon id="umapSettingsIcon" className="umap settings icon"
+                                        fontSize="small"/>
                       </Grid>
                   </Grid>
 

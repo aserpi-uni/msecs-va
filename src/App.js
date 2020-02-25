@@ -22,6 +22,7 @@ class App extends React.Component {
             currentRun: -1,
             dataset: undefined,
             labels: undefined,
+            permanentSelection: new Set([]),
             temporarySelection: undefined,
             umap: undefined
         }
@@ -53,6 +54,8 @@ class App extends React.Component {
                     colorScale={this.state.colorScale} distance={distance}
                     minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
                     setBusy={this.setBusy()}
+                    permanentSelection={this.state.permanentSelection}
+                    updatePermanentSelection={this.updatePermanentSelection()}
                     temporarySelection={this.state.temporarySelection}
                     updateTemporarySelection={this.updateTemporarySelection()}/>
           </Grid>
@@ -84,6 +87,28 @@ class App extends React.Component {
     updateFromElbow() {
         const component = this;
         return new_k => component.setState({currentRun: new_k})
+    }
+
+    updatePermanentSelection() {
+        const component = this;
+
+        // Accepts both arrays and sets for toggling, only sets for setting.
+        return function(operation, indices) {
+            if(operation === "toggle") {
+                component.setState(function(prevState) {
+                    const newIndices = [];
+                    for(const i of indices) {
+                        if(! prevState.permanentSelection.delete(i)) newIndices.push(i)
+                    }
+
+                    return {
+                        permanentSelection: new Set([...newIndices, ...prevState.permanentSelection])
+                    }
+                });
+            } else if(operation === "set") {
+                component.setState({permanentSelection: indices})
+            }
+        }
     }
 
     updateTemporarySelection() {
