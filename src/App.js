@@ -22,6 +22,7 @@ class App extends React.Component {
             currentRun: -1,
             dataset: undefined,
             labels: undefined,
+            temporarySelection: undefined,
             umap: undefined
         }
     }
@@ -51,7 +52,9 @@ class App extends React.Component {
                     dataset={this.state.dataset} labels={this.state.labels[this.state.currentRun]}
                     colorScale={this.state.colorScale} distance={distance}
                     minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
-                    setBusy={this.setBusy()}/>
+                    setBusy={this.setBusy()}
+                    temporarySelection={this.state.temporarySelection}
+                    updateTemporarySelection={this.updateTemporarySelection()}/>
           </Grid>
         )
     }
@@ -81,6 +84,11 @@ class App extends React.Component {
     updateFromElbow() {
         const component = this;
         return new_k => component.setState({currentRun: new_k})
+    }
+
+    updateTemporarySelection() {
+        const component = this;
+        return selectedIndex => component.setState({temporarySelection: selectedIndex})
     }
 }
 

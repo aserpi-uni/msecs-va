@@ -1,7 +1,14 @@
 .umap {
   &.dot {
     fill: dimgray;
+    opacity: 0.5;
+    cursor: pointer;
     stroke-width: 0;
+    transition: opacity 0.5s;
+
+    &.temporary-selection {
+      opacity: 1;
+    }
   }
 
 

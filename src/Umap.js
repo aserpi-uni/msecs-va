@@ -118,10 +118,13 @@ function Umap(props) {
           .data(datasetReducedTemp)
           .enter().append("circle")
           .attr("class", "umap dot")
+          .classed("temporary-selection", (d, i) => i === props.temporarySelection)
           .attr("cx", d => xScale(d[0]))
           .attr("cy", d => yScale(d[1]))
           .attr("r", 3)
-          .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined);
+          .style("fill", d => d.length > 2 ? props.colorScale(d[2]) : undefined)
+          .on("mouseenter", (d, i) => props.updateTemporarySelection(i))
+          .on("mouseout", () => props.updateTemporarySelection(undefined));
         props.setBusy(false);
 
         const zoom = d3.zoom()
@@ -156,6 +159,11 @@ function Umap(props) {
           .transition(d3.transition().duration(750))
           .style("fill", d => props.colorScale(d[2]))
     }, [props.labels]);
+
+    useEffect(function() {
+        d3.selectAll(".umap.dot")
+          .classed("temporary-selection", (d, i) => i === props.temporarySelection);
+    }, [props.temporarySelection]);
 
     useEffect( function() {
         drawUmap();
