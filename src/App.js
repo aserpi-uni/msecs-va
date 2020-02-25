@@ -92,9 +92,24 @@ class App extends React.Component {
     updatePermanentSelection() {
         const component = this;
 
-        // Accepts both arrays and sets for toggling, only sets for setting.
+        // Accepts both arrays and sets for adding and toggling,
+        // only sets for deleting and setting.
         return function(operation, indices) {
-            if(operation === "toggle") {
+            if(operation === "add") {
+                component.setState(function(prevState) {
+                    return {
+                        permanentSelection: new Set([...prevState.permanentSelection, ...indices])
+                    }
+                })
+            } else if (operation === "delete") {
+                component.setState(function(prevState) {
+                    return {
+                        permanentSelection: new Set([...prevState.permanentSelection].filter(i => ! indices.has(i)))
+                    }
+                })
+            } else if(operation === "set") {
+                component.setState({permanentSelection: indices})
+            } else if(operation === "toggle") {
                 component.setState(function(prevState) {
                     const newIndices = [];
                     for(const i of indices) {
@@ -105,8 +120,6 @@ class App extends React.Component {
                         permanentSelection: new Set([...newIndices, ...prevState.permanentSelection])
                     }
                 });
-            } else if(operation === "set") {
-                component.setState({permanentSelection: indices})
             }
         }
     }

@@ -106,6 +106,31 @@ function Umap(props) {
           h = props.height,
           w = props.width;
 
+        const brush = d3.brush()
+          .extent([[0, 0], [props.width, props.height]])
+          .filter(() => (d3.event.shiftKey || d3.event.ctrlKey || d3.event.metaKey) && ! d3.event.button)
+          .keyModifiers(false)
+          .on("end", brushed);
+
+        const zoom = d3.zoom()
+          .scaleExtent([1, maxZoom])
+          .on("zoom", zoomed);
+
+        rootSvg
+          .on("click", onBackgroundClicked)
+          .call(zoom);
+
+        baseSvg
+          .on("click", () => d3.event.stopPropagation());
+        d3.select("#umapSettingsIcon")
+          .on("click", () => setOpenSettings(true));
+
+        // Insert as first child to keep hover and click events on dots
+        baseSvg.insert("g", ":first-child")
+          .attr("class", "umap brush")
+          .on("click", onBackgroundClicked)
+          .call(brush);
+
         const rScale = d3.scaleLinear()
           .domain([1, maxZoom])
           .range([3, 10]);
@@ -143,20 +168,29 @@ function Umap(props) {
           .on("mouseenter", (d, i) => props.updateTemporarySelection(i))
           .on("mouseout", () => props.updateTemporarySelection(undefined));
 
-        const zoom = d3.zoom()
-          .scaleExtent([1, maxZoom])
-          .on("zoom", zoomed);
-
-        rootSvg
-          .on("click", onBackgroundClicked)
-          .call(zoom);
-
-        baseSvg
-          .on("click", () => d3.event.stopPropagation());
-        d3.select("#umapSettingsIcon")
-          .on("click", () => setOpenSettings(true));
-
         props.setBusy(false);
+
+        function brushed() {
+            if(! d3.event.selection) return;
+            d3.select(".umap.brush").call(brush.move, null);
+
+            const zoom = d3.zoomTransform(d3.select("#rootUmapChart").node()),
+              newXScale = zoom.rescaleX(xScale),
+              newYScale = zoom.rescaleY(yScale);
+
+            let [p1, p2] = d3.event.selection;
+            p1 = [newXScale.invert(p1[0]), newYScale.invert(p1[1])];
+            p2 = [newXScale.invert(p2[0]), newYScale.invert(p2[1])];
+
+            const dots = [];
+            d3.selectAll(".umap.dot")
+              .each(function(d, i) {
+                  if(d[0] >= p1[0] && d[0] <= p2[0] && d[1] >= p2[1] && d[1] <= p1[1]) dots.push(i)
+              });
+
+            if(d3.event.sourceEvent.shiftKey) props.updatePermanentSelection("add", dots);
+            else props.updatePermanentSelection("delete", new Set(dots))
+        }
 
         function zoomed() {
             const t = d3.event.transform;
