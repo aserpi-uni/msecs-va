@@ -1,4 +1,10 @@
 .umap {
+  &.centroid {
+    stroke: black;
+    stroke-width: 1;
+  }
+
+
   &.dot {
     fill: dimgray;
     opacity: 0.5;

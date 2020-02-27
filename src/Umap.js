@@ -35,6 +35,7 @@ nNeighborsMarks.push({label: "15", value: 15});
 
 
 function Umap(props) {
+    const [centroidsReduced, setCentroidsReduced] = useState([]);
     const [datasetReduced, setDatasetReduced] = useState([]);
     const [epoch, setEpoch] = useState(-1);
     const [minDist, setMinDist] = useState(props.minDist || 0.1);
@@ -88,14 +89,29 @@ function Umap(props) {
         }
     }
 
+    function drawCentroids() {
+        if(! props.centroids) return;
+
+        const newArr = new Array(1200).fill(props.centroids[0]);
+        console.log(newArr);
+        const centroidsReducedTemp = umap.transform(newArr);
+        setCentroidsReduced(centroidsReducedTemp);
+        svg.selectAll(".umap.centroid")
+          .data(centroidsReducedTemp)
+          .enter().append("path")
+            .attr("d", d3.symbolStar().size(3))
+            .attr("transform", d => `translate(${xScale(d[0])}, ${yScale[0]})`)
+    }
+
     async function drawUmap() {
         props.setBusy(true);
-        const datasetReducedTemp = await new UMAP({
+        const umap = new UMAP({
             distanceFn: props.distance,
             minDist: minDist,
             nEpochs: nEpochs,
-            nNeighbors: nNeighbors})
-          .fitAsync(props.dataset, setEpoch);
+            nNeighbors: nNeighbors}),
+          datasetReducedTemp = await umap.fitAsync(props.dataset, setEpoch);
+
         if(props.labels !== undefined) mergeLabels(datasetReducedTemp);
         setDatasetReduced(datasetReducedTemp);
         setEpoch(-1);
@@ -168,6 +184,8 @@ function Umap(props) {
           .on("mouseenter", (d, i) => props.updateTemporarySelection(i))
           .on("mouseout", () => props.updateTemporarySelection(undefined));
 
+        drawCentroids();
+
         props.setBusy(false);
 
         function brushed() {
@@ -216,7 +234,9 @@ function Umap(props) {
 
         d3.selectAll(".umap.dot")
           .transition(d3.transition().duration(750))
-          .style("fill", d => props.colorScale(d[2]))
+          .style("fill", d => props.colorScale(d[2]));
+
+        drawCentroids()
     }, [props.labels]);
 
     useEffect(function() {

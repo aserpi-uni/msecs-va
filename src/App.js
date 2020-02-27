@@ -50,6 +50,7 @@ class App extends React.Component {
                      busy={this.state.busy} onRunChange={this.updateFromElbow()}/>
 
               <Umap height={commonHeight} padding={padding} width={firstRowWidth}
+                    centroids={this.state.centroids[this.state.currentRun]}
                     dataset={this.state.dataset} labels={this.state.labels[this.state.currentRun]}
                     colorScale={this.state.colorScale} distance={distance}
                     minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
