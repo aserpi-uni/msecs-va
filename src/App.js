@@ -58,7 +58,13 @@ class App extends React.Component {
                     updatePermanentSelection={this.updatePermanentSelection()}
                     temporarySelection={this.state.temporarySelection}
                     updateTemporarySelection={this.updateTemporarySelection()}/>
-              <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
+
+
+
+          </Grid>
+        )
+    }
+    /* <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
                    dataset={this.state.dataset}
                    centroids={this.state.centroids}
                    labels={this.state.labels[this.state.currentRun]}
@@ -66,10 +72,8 @@ class App extends React.Component {
                    permanentSelection={this.state.permanentSelection}
                    updatePermanentSelection={this.updatePermanentSelection()}
                    temporarySelection={this.state.temporarySelection}
-                   updateTemporarySelection={this.updateTemporarySelection()}/>
-          </Grid>
-        )
-    }
+                   updateTemporarySelection={this.updateTemporarySelection()}/>*/
+
 
     setBusy() {
         const component = this;

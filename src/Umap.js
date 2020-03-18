@@ -107,7 +107,7 @@ function Umap(props) {
           w = props.width;
 
         const brush = d3.brush()
-          .extent([[0, 0], [props.width, F]])
+          .extent([[0, 0], [props.width, props.height]])
           .filter(() => (d3.event.shiftKey || d3.event.ctrlKey || d3.event.metaKey) && ! d3.event.button)
           .keyModifiers(false)
           .on("end", brushed);
