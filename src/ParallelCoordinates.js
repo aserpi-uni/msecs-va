@@ -6,7 +6,9 @@ import {categoricalFeatures, numericalFeatures} from "./utils"
 
 function ParallelCoordinates(props) {
     useEffect(function() {
-        const dimensions = d3.keys(props.dataset[0])
+        const data = props.dataset
+        const dimensions = d3.keys(data[0])
+        console.log("dimensions: "+ dimensions)
         const svg = d3.select("#paralCoordChart"),
             h = props.height ,
             w = props.width ;
@@ -15,15 +17,17 @@ function ParallelCoordinates(props) {
         let attribute;
         for (i in dimensions) {
             attribute = dimensions[i];
-            if(attribute in numericalFeatures){
+            console.log("attribute:"+ attribute)
+            if(numericalFeatures.includes(attribute)){
                 yScale[attribute] = d3.scaleLinear()
-                    .domain(d3.extent(props.dataset, function(d){return +d[attribute];}))
+                    .domain(d3.extent(data, function(d){return +d[attribute];}))
                     .range([h, 0]);}
-            else if (attribute in categoricalFeatures){
+            else if (categoricalFeatures.includes(attribute)){
                 yScale[attribute] = d3.scalePoint()
-                    .domain(props.dataset, function(d){return +d[attribute];})
+                    .domain(data, function(d){return +d[attribute];})
                     .range([h, 0]);
             }
+            else throw Error("Unrecognizable attribute")
         };
         let xScale;
         xScale = d3.scalePoint()
@@ -39,7 +43,7 @@ function ParallelCoordinates(props) {
         // Draw the path:
         svg
             .selectAll("myPath")
-            .data(props.dataset)
+            .data(data)
             .enter().append("path")
             .attr("d",  path)
             .style("fill", "none")
@@ -60,7 +64,8 @@ function ParallelCoordinates(props) {
             .style("text-anchor", "middle")
             .attr("y", -9)
             .text(function(d) { return d; })
-            .style("fill", "black")}, []);
+            .style("fill", "black")
+    }, []);
 
         return (
             <svg id="baseParalCoordChart" className="paralCoord chart"
