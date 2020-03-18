@@ -81,4 +81,4 @@ function computeVariance(dataset, labels, k) {
 }
 
 
-export { computeSse, computeVariance, distance, init, parseDatasetElement }
+export { computeSse, computeVariance, distance, init, parseDatasetElement, categoricalFeatures, numericalFeatures }
