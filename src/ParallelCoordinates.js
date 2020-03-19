@@ -8,8 +8,8 @@ function ParallelCoordinates(props) {
     const data = props.dataset
     useEffect(function() {
 
-        const dimensions = d3.keys(data[0])
-        //console.log("dimensions: "+ dimensions)
+        const dimensions = d3.keys(data[0]);
+        console.log(dimensions);
         const svg = d3.select("#paralCoordChart"),
             h = props.height ,
             w = props.width ;
@@ -25,10 +25,11 @@ function ParallelCoordinates(props) {
                     .domain(d3.extent(data, function(d){return +d[attribute];}))
                     .range([h, 0]);}
             else if (categoricalFeatures.includes(attribute)){
+                yScale[attribute] = d3.scaleBand()
+                    .domain(data.map(function(d){return d[attribute];}))
+                    .range([h, 0])
+                    .padding([1]);
 
-                yScale[attribute] = d3.scaleOrdinal()
-                    .domain(data, function(d){return d[attribute];})
-                    .range(d3.range(h, 0));
             }
             else throw Error("Unrecognizable attribute")
         };
