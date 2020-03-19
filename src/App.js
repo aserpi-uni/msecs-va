@@ -62,7 +62,7 @@ class App extends React.Component {
                     updateTemporarySelection={this.updateTemporarySelection()}/>
                     </div>
               <div>
-                  <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth*2}
+                  <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
                                        dataset={this.state.dataset}
                                        centroids={this.state.centroids}
                                        labels={this.state.labels[this.state.currentRun]}

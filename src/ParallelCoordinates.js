@@ -9,7 +9,7 @@ function ParallelCoordinates(props) {
     useEffect(function() {
 
         const dimensions = d3.keys(data[0]);
-        console.log(dimensions);
+        //console.log(dimensions);
         const svg = d3.select("#paralCoordChart"),
             h = props.height ,
             w = props.width ;
@@ -39,19 +39,25 @@ function ParallelCoordinates(props) {
             .range([0, w])
             .padding(1);
 
+        //let color;
+        //color = d3.scaleOrdinal()
+         //   .domain(props.labels)
+          //  .range(props.colorScale);
+
+        console.log(props.colorScale);
+
         function path(d) {
             return d3.line()(dimensions.map(function(p) { return [xScale(p), yScale[p](d[p])]; }));
         }
 
-
         // Draw the path:
-        svg
-            .selectAll("myPath")
+        svg.selectAll("myPath")
             .data(data)
             .enter().append("path")
+            .attr("class", "lines")
             .attr("d",  path)
             .style("fill", "none")
-            .style("stroke", "#69b3a2")
+            .style("stroke", "lightgrey")
             .style("opacity", 0.5)
 
         // Draw the axis: (this is done after the path so that the axis is on top of the lines)
@@ -70,6 +76,25 @@ function ParallelCoordinates(props) {
             .text(function(d) { return d; })
             .style("fill", "black")
     }, []);
+    // Functions for colourings, and selections
+    useEffect(function() {
+        //console.log("sono in useEffect")
+        if(props.labels === undefined) return;
+        d3.selectAll(".lines")
+            .transition(d3.transition().duration(750))
+            .style("stroke",(d, i) => props.colorScale(props.labels[i]))
+        }, [props.labels]);
+
+    //useEffect(function() {
+    //    d3.selectAll(".line")
+    //        .classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
+    //        .classed("temporary-selection", false)
+    //}, [props.permanentSelection]);
+
+    //useEffect(function() {
+    //    d3.selectAll(".line")
+    //        .classed("temporary-selection", (d, i) => i === props.temporarySelection);
+    //}, [props.temporarySelection]);
 
         return (
             <svg id="baseParalCoordChart" className="paralCoord chart"
