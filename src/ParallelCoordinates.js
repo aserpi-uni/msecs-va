@@ -5,10 +5,11 @@ import "./ParallelCoordinates.scss"
 import {categoricalFeatures, numericalFeatures} from "./utils"
 
 function ParallelCoordinates(props) {
+    const data = props.dataset
     useEffect(function() {
-        const data = props.dataset
+
         const dimensions = d3.keys(data[0])
-        console.log("dimensions: "+ dimensions)
+        //console.log("dimensions: "+ dimensions)
         const svg = d3.select("#paralCoordChart"),
             h = props.height ,
             w = props.width ;
@@ -16,16 +17,18 @@ function ParallelCoordinates(props) {
         let i;
         let attribute;
         for (i in dimensions) {
+            //console.log("for loop"+i)
             attribute = dimensions[i];
-            console.log("attribute:"+ attribute)
+            //console.log("attribute:"+ attribute)
             if(numericalFeatures.includes(attribute)){
                 yScale[attribute] = d3.scaleLinear()
                     .domain(d3.extent(data, function(d){return +d[attribute];}))
                     .range([h, 0]);}
             else if (categoricalFeatures.includes(attribute)){
-                yScale[attribute] = d3.scalePoint()
-                    .domain(data, function(d){return +d[attribute];})
-                    .range([h, 0]);
+
+                yScale[attribute] = d3.scaleOrdinal()
+                    .domain(data, function(d){return d[attribute];})
+                    .range(d3.range(h, 0));
             }
             else throw Error("Unrecognizable attribute")
         };

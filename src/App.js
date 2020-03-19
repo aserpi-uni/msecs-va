@@ -45,6 +45,7 @@ class App extends React.Component {
 
         return (
           <Grid id="base" style={{height, width}}>
+              <div>
               <Elbow height={commonHeight} padding={padding} width={firstRowWidth}
                      centroids={this.state.centroids} dataset={this.state.dataset}
                      labels={this.state.labels}
@@ -59,15 +60,20 @@ class App extends React.Component {
                     updatePermanentSelection={this.updatePermanentSelection()}
                     temporarySelection={this.state.temporarySelection}
                     updateTemporarySelection={this.updateTemporarySelection()}/>
-              <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
-                                   dataset={this.state.dataset}
-                                   centroids={this.state.centroids}
-                                   labels={this.state.labels[this.state.currentRun]}
-                                   colorScale={this.state.colorScale}
-                                   permanentSelection={this.state.permanentSelection}
-                                   updatePermanentSelection={this.updatePermanentSelection()}
-                                   temporarySelection={this.state.temporarySelection}
-                                   updateTemporarySelection={this.updateTemporarySelection()}/>
+                    </div>
+              <div>
+                  <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
+                                       dataset={this.state.dataset}
+                                       centroids={this.state.centroids}
+                                       labels={this.state.labels[this.state.currentRun]}
+                                       colorScale={this.state.colorScale}
+                                       permanentSelection={this.state.permanentSelection}
+                                       updatePermanentSelection={this.updatePermanentSelection()}
+                                       temporarySelection={this.state.temporarySelection}
+                                       updateTemporarySelection={this.updateTemporarySelection()}/>
+                    </div>
+
+
 
 
           </Grid>
