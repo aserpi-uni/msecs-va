@@ -54,11 +54,13 @@ function ParallelCoordinates(props) {
         svg.selectAll("myPath")
             .data(data)
             .enter().append("path")
-            .attr("class", "lines")
+            //.classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
+            //.classed("temporary-selection", (d, i) => i === props.temporarySelection)
+            .attr("class", "path line")
             .attr("d",  path)
             .style("fill", "none")
             .style("stroke", "lightgrey")
-            .style("opacity", 0.5)
+            .style("opacity", 0.1)
 
         // Draw the axis: (this is done after the path so that the axis is on top of the lines)
         svg.selectAll("myAxis")
@@ -80,21 +82,53 @@ function ParallelCoordinates(props) {
     useEffect(function() {
         //console.log("sono in useEffect")
         if(props.labels === undefined) return;
-        d3.selectAll(".lines")
+        d3.selectAll(".path.line")
             .transition(d3.transition().duration(750))
             .style("stroke",(d, i) => props.colorScale(props.labels[i]))
+            .style("opacity", 0.1)
         }, [props.labels]);
 
-    //useEffect(function() {
-    //    d3.selectAll(".line")
-    //        .classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
-    //        .classed("temporary-selection", false)
-    //}, [props.permanentSelection]);
+    useEffect(function() {
+        d3.selectAll(".path.line")
+            .transition(d3.transition().duration(750))
+            .style("opacity", calcOpacityPerm)
+    }, [props.permanentSelection]);
 
-    //useEffect(function() {
-    //    d3.selectAll(".line")
-    //        .classed("temporary-selection", (d, i) => i === props.temporarySelection);
-    //}, [props.temporarySelection]);
+    useEffect(function() {
+        d3.selectAll(".path.line")
+            .transition(d3.transition().duration(120))
+            .style("opacity", calcOpacityTemp)
+    }, [props.temporarySelection]);
+    function calcOpacityTemp(d, i){
+        if(props.temporarySelection !== undefined){
+            if (i === props.temporarySelection){
+                return 0.9;
+            }
+            else if(props.permanentSelection.has(i)) {return 0.9;}
+            else return 0.1;
+        }
+        else if (props.permanentSelection.has(i)){return calcOpacityPerm;}
+        else return 0.1;
+    }
+    function calcOpacityPerm(d, i){
+        if(props.permanentSelection !== undefined){
+            if (props.permanentSelection.has(i)){
+                return 0.9;
+            }
+            else return 0.1;
+        }
+        else return 0.1;
+    }
+
+    function calcOpacity(d, i){
+        if(props.temporarySelection !== undefined && props.permanentSelection !== undefined){
+            if (i === props.temporarySelection || props.permanentSelection.has(i) ){
+                return 1;
+            }
+            else return 0.1;
+        }
+    }
+
 
         return (
             <svg id="baseParalCoordChart" className="paralCoord chart"
