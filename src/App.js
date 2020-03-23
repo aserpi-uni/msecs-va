@@ -8,6 +8,7 @@ import DropFiles from "./DropFiles";
 import Elbow from "./Elbow";
 import Umap from "./Umap";
 import ParallelCoordinates from "./ParallelCoordinates"
+import Silhouette from "./Silhouette"
 import {distance} from "./utils";
 
 
@@ -64,13 +65,23 @@ class App extends React.Component {
               <div>
                   <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
                                        dataset={this.state.dataset}
-                                       centroids={this.state.centroids}
                                        labels={this.state.labels[this.state.currentRun]}
                                        colorScale={this.state.colorScale}
                                        permanentSelection={this.state.permanentSelection}
                                        updatePermanentSelection={this.updatePermanentSelection()}
                                        temporarySelection={this.state.temporarySelection}
                                        updateTemporarySelection={this.updateTemporarySelection()}/>
+                  <Silhouette height={commonHeight} padding={padding} width={firstRowWidth}
+                              dataset={this.state.dataset}
+                              currentRun = {this.state.currentRun}
+                              centroids={this.state.centroids}
+                              labels={this.state.labels[this.state.currentRun]}
+                              colorScale={this.state.colorScale}
+                              permanentSelection={this.state.permanentSelection}
+                              updatePermanentSelection={this.updatePermanentSelection()}
+                              temporarySelection={this.state.temporarySelection}
+                              updateTemporarySelection={this.updateTemporarySelection()}/>
+
                     </div>
 
 
@@ -88,6 +99,15 @@ class App extends React.Component {
                    updatePermanentSelection={this.updatePermanentSelection()}
                    temporarySelection={this.state.temporarySelection}
                    updateTemporarySelection={this.updateTemporarySelection()}/>*/
+/*<Silhouette height={commonHeight} padding={padding} width={firstRowWidth}
+dataset={this.state.dataset}
+centroids={this.state.centroids}
+labels={this.state.labels[this.state.currentRun]}
+colorScale={this.state.colorScale}
+permanentSelection={this.state.permanentSelection}
+updatePermanentSelection={this.updatePermanentSelection()}
+temporarySelection={this.state.temporarySelection}
+updateTemporarySelection={this.updateTemporarySelection()}/>*/
 
 
     setBusy() {

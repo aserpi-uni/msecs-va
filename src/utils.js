@@ -80,5 +80,41 @@ function computeVariance(dataset, labels, k) {
     return computeWeightedSquareOfDistance(dataset, labels, k) / commonElbowDenominator
 }
 
+// Silhouette-method objects
 
-export { computeSse, computeVariance, distance, init, parseDatasetElement, categoricalFeatures, numericalFeatures }
+function computeSilhouetteValue(dataset, centroids, dimensionMatrix, index, indexLabel, labels){
+    const currentLabel = labels[index];
+    const currentIndex = index;
+    const elements = labels.length;
+    let C_i = 0;
+    let C_k = {};
+    let sum_ai = 0;
+    let sum_bi = {};
+    let b_i = 1;
+    let a_i, b_i_set = {};
+    for(let i in elements){
+        if(labels[i] === currentLabel){
+            C_i += 1;
+            sum_ai += distance(dataset[currentIndex], dataset[i]);
+        }
+        else {
+            C_k[labels[i]] += 1;
+            sum_bi[i] += distance(dataset[currentIndex], dataset[i]);
+        }
+    }
+    if(C_i > 1){return 0}
+    else {
+        a_i = sum_ai / (C_i - 1);
+        for (let key in C_k) {
+            b_i_set[key] = sum_bi[key] / (C_k[key]);
+            if (b_i_set[key] < b_i) {
+                b_i = b_i_set[key];
+            }
+        }
+        let s_i = (b_i - a_i) / (d3.max([a_i, b_i]));
+        return s_i;
+    }
+}
+
+
+export { computeSse, computeVariance, distance, init, parseDatasetElement, categoricalFeatures, numericalFeatures, computeSilhouetteValue }
