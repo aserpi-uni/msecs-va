@@ -24,10 +24,10 @@ function Silhouette(props) {
         let xScale = d3.scaleLinear()
             .domain([-1, 1])
             .range([0, w]);
-        let yScale = d3.scaleBand()
-             .domain(data.map(function(d, i){return i}))
+        let yScale = d3.scaleLinear()
+             .domain([0, data.length])
              .range([h, 0])
-            .padding("0.05")
+            //.padding("0.05")
         svg.append("g")
             .attr("class", "MyAxisX")
             .attr("transform", `translate(0, ${h})`)
@@ -37,12 +37,12 @@ function Silhouette(props) {
             .attr("class", "MyAxisY")
             .call(d3.axisLeft(yScale));
 
-        svg.append("rect")
+        /*svg.enter().append("rect")
             .attr("class", "silhouette bar")
             .attr("x", xScale(0))
             .attr("y", (d, i) => yScale(i))
             .attr("height", yScale.bandwidth())
-            .attr("width", xScale(0))
+            .attr("width", xScale(0))*/
 
     }, []);
 
