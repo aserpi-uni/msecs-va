@@ -6,28 +6,38 @@ import {distance, categoricalFeatures, numericalFeatures, computeSilhouetteValue
 
 
 function Silhouette(props) {
-    const data = props.dataset
-    let distanceMatrix = []
-    let i,j;
-    for(i in data.length){
-        distanceMatrix[i] = []
-    }
+    console.log(props.centroids);
+
+    const data = props.dataset;
+    const h = props.height ,
+        w = props.width ;
+    let distanceMatrix = new Array(data.length);
+
+    let silhouetteDict = {};
     useEffect(function(){
-        for(i in data.length){
-            for(j in data.length){
-                distanceMatrix[i][j] = distance(data[i], data[j])
+        for(let i = 0; i < data.length; i++){
+            let distanceRow = new Array(data.length)
+            for(let j = 0; j < data.length; j++){
+                //console.log("distance between data["+i+"] and data["+j+"]");
+                distanceRow[j] = distance(data[i], data[j])
+            }
+            distanceMatrix[i] = distanceRow;
+        }
+        console.log(distanceMatrix)
+        for (let i in data.length){
+            for(let key in props.centroids) {
+                silhouetteDict[key] = computeSilhouetteValue(data, props.centroids[key], distanceMatrix, i, props.labels[i], props.labels);
             }
         }
-        const svg = d3.select("#silhouetteChart"),
-            h = props.height ,
-            w = props.width ;
-        let xScale = d3.scaleLinear()
-            .domain([-1, 1])
-            .range([0, w]);
+        const svg = d3.select("#silhouetteChart");
+
         let yScale = d3.scaleLinear()
+            .domain([-1, 1])
+            .range([h, 0]);
+        let xScale = d3.scaleLinear()
              .domain([0, data.length])
-             .range([h, 0])
-            //.padding("0.05")
+             .range([0,w])
+            //.padding("0.05");
         svg.append("g")
             .attr("class", "MyAxisX")
             .attr("transform", `translate(0, ${h})`)
@@ -39,36 +49,40 @@ function Silhouette(props) {
 
         /*svg.enter().append("rect")
             .attr("class", "silhouette bar")
-            .attr("x", xScale(0))
-            .attr("y", (d, i) => yScale(i))
-            .attr("height", yScale.bandwidth())
-            .attr("width", xScale(0))*/
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", function(d){return yScale(h);})
+            .attr("height", function(d){return (h);})
+            .attr("width", xScale.bandwidth())*/
 
     }, []);
 
     useEffect(function(){
-
-            /*const svg = d3.select("#silhouetteChart"),
-                h = props.height,
-                w = props.width;
-            let yScale = d3.scaleBand()
-                .domain([0, data.length])
-                .range([h, 0])
-            let xScale = d3.scaleLinear()
+        if(props.centroids[props.currentRun] !== undefined) {
+            console.log(props.currentRun)
+            /*let xScale = d3.scaleBand()
+                .domain(d3.range(0, data.length))
+                .range([0,w])*/
+            let xScale = d3.scaleBand()
+                .domain(d3.range(0, data.length))
+                .range([0, w])
+            let yScale = d3.scaleLinear()
                 .domain([-1, 1])
-                .range([0, w]);
-            d3.select(".MyAxisY")
-                .call(d3.axisLeft(yScale));
-            svg.selectAll(".silhouette.bar")
-                .data(props.dataset)
+                .range([h, 0]);
+            const svg = d3.select("#silhouetteChart");
+            svg.select(".MyAxisX")
+                .call(d3.axisBottom(xScale));
+
+            d3.selectAll(".silhouette.bar")
+                .data(data)
                 .enter()
                 .append('rect')
                 .attr("class", "silhouette bar")
-                .attr('y', (d, i) => yScale(i))
-                .attr('x', (d, i) => xScale(0))
-                .attr('height', (d, i, data) => xScale(computeSilhouetteValue(data, props.centroids[props.currentRun], distanceMatrix, i, props.labels[i], props.labels)))
-                .attr('width', yScale.bandwidth())*/
+                .attr('x', (d, i) => xScale(i))
+                .attr('width', xScale.bandwidth())
+                .attr('y', (d, i, data) => yScale(computeSilhouetteValue(data, props.centroids[props.currentRun], distanceMatrix, i, props.labels[i], props.labels)))
+                .attr('height', (d, i, data) => h - yScale(computeSilhouetteValue(data, props.centroids[props.currentRun], distanceMatrix, i, props.labels[i], props.labels)))
 
+        }
 
 
     }, props.centroids[props.currentRun]);

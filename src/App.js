@@ -63,7 +63,7 @@ class App extends React.Component {
                     updateTemporarySelection={this.updateTemporarySelection()}/>
                     </div>
               <div>
-                  <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
+                  <ParallelCoordinates height={commonHeight} padding={padding} width={(firstRowWidth*2) + padding.x}
                                        dataset={this.state.dataset}
                                        labels={this.state.labels[this.state.currentRun]}
                                        colorScale={this.state.colorScale}
@@ -71,7 +71,9 @@ class App extends React.Component {
                                        updatePermanentSelection={this.updatePermanentSelection()}
                                        temporarySelection={this.state.temporarySelection}
                                        updateTemporarySelection={this.updateTemporarySelection()}/>
-                  <Silhouette height={commonHeight} padding={padding} width={firstRowWidth}
+              </div>
+              <div>
+                  <Silhouette height={commonHeight} padding={padding} width={(firstRowWidth*3) + padding.x}
                               dataset={this.state.dataset}
                               currentRun = {this.state.currentRun}
                               centroids={this.state.centroids}
