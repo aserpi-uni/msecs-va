@@ -60,7 +60,7 @@ function ParallelCoordinates(props) {
             .attr("d",  path)
             .style("fill", "none")
             .style("stroke", "lightgrey")
-            .style("opacity", 0.05)
+            .style("opacity", 0.02)
 
         // Draw the axis: (this is done after the path so that the axis is on top of the lines)
         svg.selectAll("myAxis")
@@ -85,7 +85,7 @@ function ParallelCoordinates(props) {
         d3.selectAll(".path.line")
             .transition(d3.transition().duration(750))
             .style("stroke",(d, i) => props.colorScale(props.labels[i]))
-            .style("opacity", 0.05)
+            .style("opacity", 0.02)
         }, [props.labels]);
 
     useEffect(function() {
@@ -105,19 +105,19 @@ function ParallelCoordinates(props) {
                 return 0.9;
             }
             else if(props.permanentSelection.has(i)) {return 0.9;}
-            else return 0.05;
+            else return 0.02;
         }
         else if (props.permanentSelection.has(i)){return calcOpacityPerm;}
-        else return 0.05;
+        else return 0.02;
     }
     function calcOpacityPerm(d, i){
         if(props.permanentSelection !== undefined){
             if (props.permanentSelection.has(i)){
                 return 0.9;
             }
-            else return 0.05;
+            else return 0.02;
         }
-        else return 0.05;
+        else return 0.02;
     }
 
     function calcOpacity(d, i){
@@ -125,7 +125,7 @@ function ParallelCoordinates(props) {
             if (i === props.temporarySelection || props.permanentSelection.has(i) ){
                 return 1;
             }
-            else return 0.05;
+            else return 0.02;
         }
     }
 

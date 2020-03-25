@@ -77,7 +77,8 @@ class App extends React.Component {
                               dataset={this.state.dataset}
                               currentRun = {this.state.currentRun}
                               centroids={this.state.centroids}
-                              labels={this.state.labels[this.state.currentRun]}
+                              labels = {this.state.labels}
+                              currentLabels={this.state.labels[this.state.currentRun]}
                               colorScale={this.state.colorScale}
                               permanentSelection={this.state.permanentSelection}
                               updatePermanentSelection={this.updatePermanentSelection()}
