@@ -3,8 +3,7 @@ import d3tip from 'd3-tip'
 import React, {useEffect} from "react";
 import "./ParallelCoordinates.scss"
 import {distance, categoricalFeatures, numericalFeatures, computeSilhouetteValue} from "./utils"
-
-
+const silhouetteDict = {};
 function Silhouette(props) {
     console.log(props.centroids);
 
@@ -12,7 +11,7 @@ function Silhouette(props) {
     const h = props.height ,
         w = props.width ;
     let distanceMatrix = new Array(data.length);
-    let silhouetteDict = {};
+
     useEffect(function(){
 
         for(let i = 0; i < data.length; i++){
@@ -27,41 +26,49 @@ function Silhouette(props) {
         const elements = data.length;
         // silhouetteDict is in the form of a dictionary in which each key corresponds to a point, and its value is a dictionary-object in which each key is a different run, and its value is its silhouette value.
 
-            for(const [key,value] of  Object.entries(props.centroids)) {
-                let silhouetteValues = {};
-                let currentLabels = props.labels[key];
-                for (let i = 0; i < elements; i++){
-                    const currentLabel = currentLabels[i];
-                    const currentIndex = i;
-                    let C_i = 0;
-                    let C_k = {};
-                    let sum_a_i = 0;
-                    let sum_b_i = {};
-                    let b_i = 1;
-                    let a_i, b_i_set = {};
-                    for(let j = 0; j < elements; j++){
-                        if(currentLabels[j] === currentLabel){
-                            C_i += 1; //number of elements in C_i
-                            sum_a_i += distanceMatrix[currentIndex][j];
-                        }
-                        else {
-                            if(C_k[currentLabels[j]] === undefined){C_k[currentLabels[j]] = 0;}
-                            C_k[currentLabels[j]] += 1; // number of elements for each C_k, with k != i
-                            sum_b_i[j] += distanceMatrix[currentIndex][j];
-                        }
+        for(const [key,value] of  Object.entries(props.centroids)) {
+            let silhouetteValues = {};
+            let currentLabels = props.labels[key];
+            for (let i = 0; i < 1; i++){
+                const currentLabel = currentLabels[i];
+                const currentIndex = i;
+                let C_i = 0;
+                let C_k = {};
+                let sum_a_i = 0;
+                let a_i = 0;
+                let sum_b_i = {};
+                let b_i = 1;
+                let b_i_set = {};
+                for(let j = 0; j < elements; j++){
+                    if(currentLabels[j] === currentLabel){
+                        C_i += 1; //number of elements in C_i
+                        sum_a_i += distanceMatrix[currentIndex][j];
                     }
-                    if(C_i === 1){silhouetteValues[i] = 0;}
                     else {
-                        a_i = sum_a_i / (C_i - 1);
-                        for (let key in C_k) {
-                            b_i_set[key.toString()] = sum_b_i[key] / (C_k[key]);
-                            if (b_i_set[key] < b_i) {
-                                b_i = b_i_set[key];
-                            }
+                        if(C_k[currentLabels[j]] === undefined){
+                            C_k[currentLabels[j]] = 0;
+                            sum_b_i[j] = 0;
                         }
-                        let s_i = (b_i - a_i) / (d3.max([a_i, b_i]));
-                        silhouetteValues[i] =  s_i;
+                        C_k[currentLabels[j]] += 1; // number of elements for each C_k, with k != i
+                        sum_b_i[j] += distanceMatrix[currentIndex][j];
                     }
+                }
+                console.log(C_i);
+                console.log(sum_a_i);
+                console.log(C_k);
+                console.log(sum_b_i);
+                if(C_i === 1){silhouetteValues[i] = 0;}
+                else {
+                    a_i = sum_a_i / (C_i - 1);
+                    for (let j in C_k) {
+                        b_i_set[j] = sum_b_i[j] / (C_k[j]);
+                        if (b_i_set[j] < b_i) {
+                            b_i = b_i_set[j];
+                        }
+                    }
+                    let s_i = (b_i - a_i) / (d3.max([a_i, b_i]));
+                    silhouetteValues[i] =  s_i;
+                }
             }
             silhouetteDict[key]= silhouetteValues;
         }
@@ -94,10 +101,10 @@ function Silhouette(props) {
             .attr("class", "MyAxisY")
             .call(d3.axisLeft(yScale));
 
-        svg.selectAll(".silhouette.bar")
+        svg.selectAll(".silhouetteBar")
             .data(data)
             .enter().append("rect")
-            .attr("class", "silhouette bar")
+            .attr("class", "silhouetteBar")
             .attr('x', (d, i) => xScale(i))
             .attr('width', xScale.bandwidth())
             .attr('y', (d, i) => yScale(silhouetteDict[0][i]))
@@ -107,7 +114,9 @@ function Silhouette(props) {
 
     useEffect(function(){
         if(props.centroids[props.currentRun] !== undefined) {
-            console.log(props.currentRun)
+            console.log("current run : "+props.currentRun)
+            console.log(silhouetteDict)
+            //console.log("silhouetteDict[props.currentRun][0]: "+silhouetteDict[props.currentRun][0])
             let xScale = d3.scaleBand()
                 .domain(d3.range(0, data.length))
                 .range([0, w])
@@ -119,17 +128,17 @@ function Silhouette(props) {
             update.select(".MyAxisX")
                 .call(d3.axisBottom(xScale));
 
-            d3.selectAll(".silhouette.bar")
+            update.selectAll(".silhouetteBar")
                 .remove()
                 .exit()
                 .data(data)
                 .enter()
                 .append('rect')
-                .attr("class", "silhouette bar")
+                .attr("class", "silhouetteBar")
                 .attr('x', (d, i) => xScale(i))
                 .attr('width', xScale.bandwidth())
-                .attr('y', (d, i, data) => yScale(silhouetteDict[props.currentRun].i))
-                .attr('height', (d, i, data) => h - yScale(silhouetteDict[props.currentRun].i))
+                .attr('y', (d, i) => yScale(silhouetteDict[props.currentRun][i]))
+                .attr('height', (d, i) => h - yScale(silhouetteDict[props.currentRun][i]))
 
         }
 
