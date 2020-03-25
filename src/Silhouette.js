@@ -37,8 +37,8 @@ function Silhouette(props) {
                 let sum_a_i = 0;
                 let a_i = 0;
                 let sum_b_i = {};
-                let b_i = 1;
                 let b_i_set = {};
+                let b_i = 1;
                 for(let j = 0; j < elements; j++){
                     if(currentLabels[j] === currentLabel){
                         C_i += 1; //number of elements in C_i
@@ -47,10 +47,11 @@ function Silhouette(props) {
                     else {
                         if(C_k[currentLabels[j]] === undefined){
                             C_k[currentLabels[j]] = 0;
-                            sum_b_i[j] = 0;
+                            sum_b_i[currentLabels[j]] = 0;
                         }
                         C_k[currentLabels[j]] += 1; // number of elements for each C_k, with k != i
-                        sum_b_i[j] += distanceMatrix[currentIndex][j];
+                        //console.log("distanceMatrix["+currentIndex+"]["+j+"] :"+distanceMatrix[currentIndex][j])
+                        sum_b_i[currentLabels[j]] += distanceMatrix[currentIndex][j];
                     }
                 }
                 console.log(C_i);
@@ -60,12 +61,12 @@ function Silhouette(props) {
                 if(C_i === 1){silhouetteValues[i] = 0;}
                 else {
                     a_i = sum_a_i / (C_i - 1);
-                    for (let j in C_k) {
-                        b_i_set[j] = sum_b_i[j] / (C_k[j]);
-                        if (b_i_set[j] < b_i) {
-                            b_i = b_i_set[j];
-                        }
+                    for (let [subkey, subvalue] in Object.entries(C_k)) {
+                        console.log(subkey);
+                        b_i_set[subkey] = sum_b_i[subkey]/(C_k[subkey]);
                     }
+                    console.log(a_i)
+                    console.log(b_i_set)
                     let s_i = (b_i - a_i) / (d3.max([a_i, b_i]));
                     silhouetteValues[i] =  s_i;
                 }
