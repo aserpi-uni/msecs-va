@@ -42,7 +42,7 @@ class App extends React.Component {
     renderApp(width, height) {
         const padding = {x: 50, y: 50},
           commonHeight = (height - 3*padding.y) / 2,
-          firstRowWidth = (width - 6*padding.x) / 3;
+          firstRowWidth = (width - 3*padding.x) / 3;
 
         return (
           <Grid id="base" style={{height, width}}>
@@ -63,7 +63,7 @@ class App extends React.Component {
                     updateTemporarySelection={this.updateTemporarySelection()}/>
                     </div>
               <div>
-                  <ParallelCoordinates height={commonHeight} padding={padding} width={(firstRowWidth*2) + padding.x}
+                  <ParallelCoordinates height={commonHeight} padding={padding} width={(firstRowWidth + padding.x)*2}
                                        dataset={this.state.dataset}
                                        labels={this.state.labels[this.state.currentRun]}
                                        colorScale={this.state.colorScale}
@@ -73,7 +73,7 @@ class App extends React.Component {
                                        updateTemporarySelection={this.updateTemporarySelection()}/>
               </div>
               <div>
-                  <Silhouette height={commonHeight} padding={padding} width={(firstRowWidth*3) + padding.x}
+                  <Silhouette height={commonHeight} padding={padding} width={(firstRowWidth + padding.x)*2}
                               dataset={this.state.dataset}
                               currentRun = {this.state.currentRun}
                               centroids={this.state.centroids}
