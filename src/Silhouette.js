@@ -29,7 +29,7 @@ function Silhouette(props) {
         for(const [key,value] of  Object.entries(props.centroids)) {
             let silhouetteValues = {};
             let currentLabels = props.labels[key];
-            for (let i = 0; i < 1; i++){
+            for (let i = 0; i < elements; i++){
                 const currentLabel = currentLabels[i];
                 const currentIndex = i;
                 let C_i = 0;
@@ -54,20 +54,38 @@ function Silhouette(props) {
                         sum_b_i[currentLabels[j]] += distanceMatrix[currentIndex][j];
                     }
                 }
-                console.log(C_i);
+                /*console.log(C_i);
                 console.log(sum_a_i);
                 console.log(C_k);
-                console.log(sum_b_i);
+                console.log("C_k object entries:")
+                console.log(Object.entries(C_k))
+                console.log("sum b_i:")
+                console.log(sum_b_i);*/
                 if(C_i === 1){silhouetteValues[i] = 0;}
                 else {
                     a_i = sum_a_i / (C_i - 1);
-                    for (let [subkey, subvalue] in Object.entries(C_k)) {
-                        console.log(subkey);
-                        b_i_set[subkey] = sum_b_i[subkey]/(C_k[subkey]);
+                    const clusters = Object.keys(C_k);
+                    //console.log("clusters:")
+                    //console.log(clusters)
+                    for (let subkey in clusters) {
+                        /*console.log("sum b_i["+clusters[subkey]+"]:")
+                        console.log(sum_b_i[clusters[subkey]]);
+                        console.log("C_k[clusters["+subkey+"]]:")
+                        console.log(C_k[clusters[subkey]])
+                        console.log(sum_b_i[clusters[subkey]]/C_k[clusters[subkey]])*/
+                        b_i_set[clusters[subkey]] = sum_b_i[clusters[subkey]]/C_k[clusters[subkey]]
+                        /*console.log("results:")
+                        console.log(b_i_set)*/
                     }
-                    console.log(a_i)
-                    console.log(b_i_set)
+                    //console.log(a_i)
+                    //console.log(b_i_set)
+                    //console.log(d3.min(Object.values(b_i_set)))
+                    b_i = d3.min(Object.values(b_i_set));
+                    console.log("a_i: "+a_i)
+                    console.log("b_i: "+b_i)
+                    console.log("max(a_i, b_i): "+d3.max([a_i, b_i]))
                     let s_i = (b_i - a_i) / (d3.max([a_i, b_i]));
+                    console.log("s_i: " +s_i)
                     silhouetteValues[i] =  s_i;
                 }
             }
