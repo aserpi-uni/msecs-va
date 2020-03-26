@@ -41,10 +41,18 @@ function Silhouette(props) {
                 let b_i = 1;
                 for(let j = 0; j < elements; j++){
                     if(currentLabels[j] === currentLabel){
+                        /*console.log("point and label (C_i)")
+                        console.log(j)
+                        console.log(data[j])
+                        console.log(currentLabels[j])*/
                         C_i += 1; //number of elements in C_i
                         sum_a_i += distanceMatrix[currentIndex][j];
                     }
                     else {
+                        /*console.log("point and label (C_k)")
+                        console.log(j)
+                        console.log(data[j])
+                        console.log(currentLabels[j])*/
                         if(C_k[currentLabels[j]] === undefined){
                             C_k[currentLabels[j]] = 0;
                             sum_b_i[currentLabels[j]] = 0;
@@ -158,6 +166,7 @@ function Silhouette(props) {
                 .attr('width', xScale.bandwidth())
                 .attr('y', (d, i) => yScale(silhouetteDict[props.currentRun][i]))
                 .attr('height', (d, i) => h - yScale(silhouetteDict[props.currentRun][i]))
+                .style("fill",(d, i) => props.colorScale(props.currentLabels[i]))
 
         }
 
