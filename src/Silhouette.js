@@ -256,7 +256,7 @@ function Silhouette(props) {
 
     useEffect(function() {
         d3.selectAll(".silhouetteBar")
-            .transition(d3.transition().duration(50))
+            //.transition(d3.transition().duration(50))
             .style("opacity", calcOpacityTemp)
     }, [props.temporarySelection]);
 

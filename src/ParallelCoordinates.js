@@ -63,12 +63,22 @@ function ParallelCoordinates(props) {
             .style("opacity", 0.02)
 
         // Draw the axis: (this is done after the path so that the axis is on top of the lines)
-        svg.selectAll("myAxis")
+        let g = svg.selectAll(".dimension")
             // For each dimension of the dataset I add a 'g' element:
-            .data(dimensions).enter()
-            .append("g")
+            .data(dimensions)
+            .enter().append("g")
+            .attr("class", "dimension")
             // I translate this element to its right position on the x axis
             .attr("transform", function(d) { return "translate(" + xScale(d) + ")"; })
+            // I add the drag behavior on each axis
+            /*.call(d3.behavior.drag()
+                .origin(function (d){return {x: xScale(d)};})
+                .on("dragstart"), function(d){
+                dragging[d] = xScale(d);
+                background
+            })*/
+
+        g.append("g")
             // And I build the axis with the call function
             .each(function(d) { d3.select(this).call(d3.axisLeft().scale(yScale[d])); })
             // Add axis title
@@ -77,6 +87,39 @@ function ParallelCoordinates(props) {
             .attr("y", -9)
             .text(function(d) { return d; })
             .style("fill", "black")
+
+        g.append("g")
+            .attr("class", "brush")
+            .each(function(d) {
+                d3.select(this)
+                    .call(yScale[d].brush = d3.svg.brush()
+                    .y(yScale[d])
+                    .on("brushstart", brushstart)
+                    .on("brush", brush));
+            })
+            .selectAll("rect")
+            .attr("x", -8)
+            .attr("width", 16);
+
+        function brushstart() {
+            d3.event.sourceEvent.stopPropagation();
+        }
+
+        // Handles a brush event, toggling the display of foreground lines.
+        function brush() {
+            let actives = dimensions.filter(function (p) {
+                    return !yScale[p].brush.empty();
+                }),
+                extents = actives.map(function (p) {
+                    return yScale[p].brush.extent();
+                });
+            //method to update opacity for paths
+            foreground.style("display", function(d) {
+                return actives.every(function(p, i) {
+                    return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+                }) ? null : "none";
+            })
+        }
     }, []);
     // Functions for colourings, and selections
     useEffect(function() {
@@ -96,7 +139,7 @@ function ParallelCoordinates(props) {
 
     useEffect(function() {
         d3.selectAll(".path.line")
-            .transition(d3.transition().duration(120))
+            //.transition(d3.transition().duration(120))
             .style("opacity", calcOpacityTemp)
     }, [props.temporarySelection]);
     function calcOpacityTemp(d, i){
