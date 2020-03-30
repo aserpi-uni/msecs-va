@@ -123,7 +123,7 @@ function Silhouette(props) {
                 })
             }
         }
-        console.log(clustersPerRun)
+        //console .log(clustersPerRun)
         for(let run in clustersPerRun){
             let sortedData = []
             let sortedLabels = []
@@ -131,18 +131,18 @@ function Silhouette(props) {
                 sortedLabels.push([label, clustersPerRun[run][label][0]])
             }
             sortedLabels.sort(function(a, b){return d3.descending(silhouetteDict[run][a[0]], silhouetteDict[run][b[0]])})
-            console.log(sortedLabels)
+          //  console.log(sortedLabels)
             for (let label in sortedLabels){
                 //console.log(sortedLabels[label])
                 //console.log(clustersPerRun[run][sortedLabels[label][0]])
                 for(let element in clustersPerRun[run][sortedLabels[label][0]]){
                     sortedData.push(clustersPerRun[run][sortedLabels[label][0]][element])
                 }
-                console.log(sortedData)
+            //    console.log(sortedData)
             }
             sortedDataPerRun[run] = sortedData;
         }
-        console.log(sortedDataPerRun)
+        //console.log(sortedDataPerRun)
         //sortedDataPerRun
         /*console.log("After sorting:");
         console.log(clustersPerRun);

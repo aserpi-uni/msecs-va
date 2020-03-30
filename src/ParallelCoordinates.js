@@ -92,10 +92,11 @@ function ParallelCoordinates(props) {
             .attr("class", "brush")
             .each(function(d) {
                 d3.select(this)
-                    .call(yScale[d].brush = d3.svg.brush()
-                    .y(yScale[d])
-                    .on("brushstart", brushstart)
-                    .on("brush", brush));
+                    .call(yScale[d].brush = d3.brushY()
+                        .extent([[-10,0], [10,h]])
+                        .on("start", brushstart)
+                        .on("brush", brush)
+                        .on("end", brush));
             })
             .selectAll("rect")
             .attr("x", -8)
@@ -107,18 +108,34 @@ function ParallelCoordinates(props) {
 
         // Handles a brush event, toggling the display of foreground lines.
         function brush() {
-            let actives = dimensions.filter(function (p) {
-                    return !yScale[p].brush.empty();
-                }),
-                extents = actives.map(function (p) {
-                    return yScale[p].brush.extent();
+            let svg = d3.selectAll("#paralCoordChart")
+            let actives = [];
+            svg.selectAll(".brush")
+                .filter(function(d){
+                    console.log("sono nel filter")
+                    yScale[d].brushSelectionValue = d3.brushSelection(this);
+                    console.log(yScale[d].brushSelectionValue)
+                    return d3.brushSelection(this);
+                })
+                .each(function(d){
+                    actives.push({
+                        dimension : d,
+                        extent: d3.brushSelection(this).map(yScale[d].invert)
+                    });
                 });
-            //method to update opacity for paths
-            foreground.style("display", function(d) {
-                return actives.every(function(p, i) {
-                    return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-                }) ? null : "none";
-            })
+            console.log(actives)
+            let selected = [];
+            props.updatePermanentSelection(function(d){
+                let isActive = actives.every(function(active) {
+                    let result = active.extent[1] <= d[active.dimension] && d[active.dimension] <= active.extent[0];
+                    return result;
+                })
+                if(isActive) {selected.push(d);}
+                return (isActive) ? null : "none";
+            });
+            //for(let i in selected){
+            //    props.updatePermanentSelection(selected[i]);
+            //}
         }
     }, []);
     // Functions for colourings, and selections
