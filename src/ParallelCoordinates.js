@@ -108,19 +108,25 @@ function ParallelCoordinates(props) {
 
         // Handles a brush event, toggling the display of foreground lines.
         function brush() {
+
             let svg = d3.selectAll("#paralCoordChart")
             let actives = [];
             svg.selectAll(".brush")
                 .filter(function(d){
-                    console.log("sono nel filter")
+                    console.log("sono nel filter " + d)
+                    //console.log(yScale[d])
                     yScale[d].brushSelectionValue = d3.brushSelection(this);
-                    console.log(yScale[d].brushSelectionValue)
+                    //console.log(d)
+                    //console.log(yScale[d].brushSelectionValue);
                     return d3.brushSelection(this);
                 })
                 .each(function(d){
+                    console.log(d)
+                    if (!d3.event.sourceEvent) return; // Only transition after input.
+                    if (!d3.event.selection) return;
                     actives.push({
                         dimension : d,
-                        extent: d3.brushSelection(this).map(yScale[d].invert)
+                        extent: d3.event.selection.map(yScale[d].invert)
                     });
                 });
             console.log(actives)
