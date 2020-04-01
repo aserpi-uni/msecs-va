@@ -20,15 +20,18 @@ function ParallelCoordinates(props) {
             //console.log("for loop"+i)
             attribute = dimensions[i];
             //console.log("attribute:"+ attribute)
-            if(numericalFeatures.includes(attribute)){
+            if(numericalFeatures.includes(attribute)) {
                 yScale[attribute] = d3.scaleLinear()
-                    .domain(d3.extent(data, function(d){return +d[attribute];}))
-                    .range([h, 0]);}
+                    .domain(d3.extent(data, function (d) {
+                        return +d[attribute];
+                    }))
+                    .range([h, 0])
+            }
             else if (categoricalFeatures.includes(attribute)){
-                yScale[attribute] = d3.scaleBand()
+                yScale[attribute] = d3.scalePoint()
                     .domain(data.map(function(d){return d[attribute];}))
                     .range([h, 0])
-                    .padding([1]);
+                    .padding(1);
 
             }
             else throw Error("Unrecognizable attribute")
@@ -108,7 +111,7 @@ function ParallelCoordinates(props) {
 
         // Handles a brush event, toggling the display of foreground lines.
         function brush() {
-
+            const selection = d3.event.selection;
             let svg = d3.selectAll("#paralCoordChart")
             let actives = [];
             svg.selectAll(".brush")
@@ -124,10 +127,29 @@ function ParallelCoordinates(props) {
                     console.log(d)
                     if (!d3.event.sourceEvent) return; // Only transition after input.
                     if (!d3.event.selection) return;
-                    actives.push({
-                        dimension : d,
-                        extent: d3.event.selection.map(yScale[d].invert)
-                    });
+                    if(numericalFeatures.includes(d)) {
+
+                        const range = d3.event.selection.map(yScale[d].invert)
+                        console.log(range)
+                        actives.push({
+                            dimension: d,
+                            extent: d3.event.selection.map(yScale[d].invert)
+                        });
+                    }
+                    else if(categoricalFeatures.includes(d)){
+                        const range = yScale[d].domain().map(yScale[d]).reverse()
+                        console.log("categorical feature")
+                        console.log(range)
+                        console.log(range.length)
+                        console.log(selection)
+                        const i0 = d3.bisectRight(range, selection[0]);
+                        const i1 = d3.bisectRight(range, selection[1]);
+                        console.log(i0 + " " + i1)
+                        actives.push({
+                            dimension: d,
+                            extent: null
+                        })
+                    }
                 });
             console.log(actives)
             let selected = [];
