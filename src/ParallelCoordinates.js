@@ -6,6 +6,7 @@ import {categoricalFeatures, numericalFeatures} from "./utils"
 
 function ParallelCoordinates(props) {
     const data = props.dataset
+
     useEffect(function() {
 
         const dimensions = d3.keys(data[0]);
@@ -47,7 +48,7 @@ function ParallelCoordinates(props) {
          //   .domain(props.labels)
           //  .range(props.colorScale);
 
-        console.log(props.colorScale);
+        //console.log(props.colorScale);
 
         function path(d) {
             return d3.line()(dimensions.map(function(p) { return [xScale(p), yScale[p](d[p])]; }));
@@ -111,12 +112,14 @@ function ParallelCoordinates(props) {
 
         // Handles a brush event, toggling the display of foreground lines.
         function brush() {
+            if (!d3.event.sourceEvent) return;
+            if(! d3.event.selection) return;
+            let actives = [];
             const selection = d3.event.selection;
             let svg = d3.selectAll("#paralCoordChart")
-            let actives = [];
             svg.selectAll(".brush")
                 .filter(function(d){
-                    console.log("sono nel filter " + d)
+                    //console.log("sono nel filter " + d)
                     //console.log(yScale[d])
                     yScale[d].brushSelectionValue = d3.brushSelection(this);
                     //console.log(d)
@@ -124,13 +127,13 @@ function ParallelCoordinates(props) {
                     return d3.brushSelection(this);
                 })
                 .each(function(d){
-                    console.log(d)
-                    if (!d3.event.sourceEvent) return; // Only transition after input.
-                    if (!d3.event.selection) return;
+                    //console.log(d)
+                    //if (!d3.event.sourceEvent) return; // Only transition after input.
+                    //if (!d3.event.selection) return;
                     if(numericalFeatures.includes(d)) {
-
+                        //console.log(d3.event.selection.map(yScale[d]))
                         const range = d3.event.selection.map(yScale[d].invert)
-                        console.log(range)
+                        //console.log(range)
                         actives.push({
                             dimension: d,
                             extent: d3.event.selection.map(yScale[d].invert)
@@ -138,32 +141,47 @@ function ParallelCoordinates(props) {
                     }
                     else if(categoricalFeatures.includes(d)){
                         const range = yScale[d].domain().map(yScale[d]).reverse()
-                        console.log("categorical feature")
+                        /*console.log("categorical feature")
                         console.log(range)
                         console.log(range.length)
-                        console.log(selection)
+                        console.log(selection)*/
+                        if(selection == null) return;
                         const i0 = d3.bisectRight(range, selection[0]);
                         const i1 = d3.bisectRight(range, selection[1]);
-                        console.log(i0 + " " + i1)
+                        //console.log(i0 + " " + i1)
+                        let slice = yScale[d].domain().reverse().slice(i0, i1)
+                        //console.log(slice)
                         actives.push({
                             dimension: d,
-                            extent: null
+                            extent: yScale[d].domain().reverse().slice(i0, i1)
                         })
                     }
                 });
             console.log(actives)
+
             let selected = [];
-            props.updatePermanentSelection(function(d){
+            for(let d in data){
+                //console.log(d)
                 let isActive = actives.every(function(active) {
-                    let result = active.extent[1] <= d[active.dimension] && d[active.dimension] <= active.extent[0];
-                    return result;
+                    if(numericalFeatures.includes(active.dimension)) {
+                        let result = active.extent[1] <= data[d][active.dimension] && data[d][active.dimension] <= active.extent[0];
+                        //if(result){console.log(data[d][active.dimension])}
+                        return result;
+                    }
+                    else if(categoricalFeatures.includes(active.dimension)){
+                        let result = active.extent.includes(data[d][active.dimension])
+                        //if(result){console.log(data[d][active.dimension])}
+                        return result
+                    }
                 })
-                if(isActive) {selected.push(d);}
-                return (isActive) ? null : "none";
-            });
-            //for(let i in selected){
-            //    props.updatePermanentSelection(selected[i]);
-            //}
+                if(isActive) {
+                    selected.push(d);
+                }
+            };
+            console.log(new Set(selected))
+            props.updatePermanentSelection("set", new Set(selected));
+            console.log(props.permanentSelection)
+
         }
     }, []);
     // Functions for colourings, and selections

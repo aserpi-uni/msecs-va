@@ -246,6 +246,7 @@ function Silhouette(props) {
                 .attr('height', (d, i) => h - yScale(silhouetteDict[props.currentRun][d[1]]))
                 .style("fill",(d, i) => props.colorScale(props.currentLabels[d[1]]))
                 .style("opacity", 0.3)
+                .on("click", onBarClicked)
                 .on("mouseenter", (d, i) => props.updateTemporarySelection(d[1]))
                 .on("mouseout", () => props.updateTemporarySelection(undefined));
 
@@ -254,14 +255,29 @@ function Silhouette(props) {
 
     }, props.centroids[props.currentRun]);
 
+    function onBarClicked(d, i) {
+        d3.event.stopPropagation();
+        props.updatePermanentSelection("add",[d[1]]);
+    }
+
     useEffect(function() {
         d3.selectAll(".silhouetteBar")
             //.transition(d3.transition().duration(50))
             .style("opacity", calcOpacityTemp)
     }, [props.temporarySelection]);
+    useEffect(function(){
+        d3.selectAll(".silhouetteBar")
+            .style("opacity", calcOpacityPerm)
+    }, [props.permanentSelection]);
 
     function calcOpacityTemp(d){
         if (d[1] === props.temporarySelection){
+            return 0.9;
+        }
+        else return 0.3;
+    }
+    function calcOpacityPerm(d){
+        if(props.permanentSelection.has(d[1])){
             return 0.9;
         }
         else return 0.3;
