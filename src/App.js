@@ -142,7 +142,6 @@ updateTemporarySelection={this.updateTemporarySelection()}/>*/
 
     updatePermanentSelection() {
         const component = this;
-
         // Accepts both arrays and sets for adding and toggling,
         // only sets for deleting and setting.
         return function(operation, indices) {

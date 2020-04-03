@@ -6,9 +6,9 @@ import {categoricalFeatures, numericalFeatures} from "./utils"
 
 function ParallelCoordinates(props) {
     const data = props.dataset
+    const indices = (Object.keys(data))
 
     useEffect(function() {
-
         const dimensions = d3.keys(data[0]);
         //console.log(dimensions);
         const svg = d3.select("#paralCoordChart"),
@@ -107,7 +107,7 @@ function ParallelCoordinates(props) {
             .attr("width", 16);
 
         function brushstart() {
-            d3.event.sourceEvent.stopPropagation();
+            props.updatePermanentSelection("delete", props.permanentSelection)
         }
 
         // Handles a brush event, toggling the display of foreground lines.
@@ -175,12 +175,15 @@ function ParallelCoordinates(props) {
                     }
                 })
                 if(isActive) {
-                    selected.push(d);
+                    selected.push(parseInt(d));
                 }
             };
-            console.log(new Set(selected))
-            props.updatePermanentSelection("set", new Set(selected));
-            console.log(props.permanentSelection)
+            //console.log(new Set(selected)
+
+            props.updatePermanentSelection("add", selected)
+
+            //props.updatePermanentSelection("set", new Set(selected));
+            //console.log(props.permanentSelection)
 
         }
     }, []);
@@ -195,8 +198,9 @@ function ParallelCoordinates(props) {
         }, [props.labels]);
 
     useEffect(function() {
+        //console.log(props.permanentSelection)
         d3.selectAll(".path.line")
-            .transition(d3.transition().duration(750))
+            //.transition(d3.transition().duration(750))
             .style("opacity", calcOpacityPerm)
     }, [props.permanentSelection]);
 
@@ -217,13 +221,19 @@ function ParallelCoordinates(props) {
         else return 0.02;
     }
     function calcOpacityPerm(d, i){
+        //console.log(props.permanentSelection)
         if(props.permanentSelection !== undefined){
             if (props.permanentSelection.has(i)){
+                //console.log(i)
                 return 0.9;
             }
-            else return 0.02;
+            else {
+                //console.log("permanentSelection undefined")
+                return 0.02;}
         }
-        else return 0.02;
+        else {
+
+            return 0.02;}
     }
 
     function calcOpacity(d, i){
