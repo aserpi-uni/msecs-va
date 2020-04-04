@@ -6,7 +6,7 @@ import {categoricalFeatures, numericalFeatures} from "./utils"
 
 function ParallelCoordinates(props) {
     const data = props.dataset
-    const indices = (Object.keys(data))
+
 
     useEffect(function() {
         const dimensions = d3.keys(data[0]);
@@ -115,13 +115,14 @@ function ParallelCoordinates(props) {
             if (!d3.event.sourceEvent) return;
             if(! d3.event.selection) return;
             let actives = [];
-            const selection = d3.event.selection;
+            const selection = d3.brushSelection(this);
             let svg = d3.selectAll("#paralCoordChart")
-            svg.selectAll(".brush")
+            svg.selectAll(".dimension .brush")
                 .filter(function(d){
                     //console.log("sono nel filter " + d)
-                    //console.log(yScale[d])
-                    yScale[d].brushSelectionValue = d3.brushSelection(this);
+                    console.log(d)
+                    console.log(d3.brushSelection(this))
+                    //yScale[d].brushSelectionValue = d3.brushSelection(this);
                     //console.log(d)
                     //console.log(yScale[d].brushSelectionValue);
                     return d3.brushSelection(this);
@@ -130,13 +131,14 @@ function ParallelCoordinates(props) {
                     //console.log(d)
                     //if (!d3.event.sourceEvent) return; // Only transition after input.
                     //if (!d3.event.selection) return;
+                    console.log(d)
                     if(numericalFeatures.includes(d)) {
-                        //console.log(d3.event.selection.map(yScale[d]))
-                        const range = d3.event.selection.map(yScale[d].invert)
+                        console.log(d3.brushSelection(this).map(yScale[d].invert))
+                        //const range = d3.event.selection.map(yScale[d].invert)
                         //console.log(range)
                         actives.push({
                             dimension: d,
-                            extent: d3.event.selection.map(yScale[d].invert)
+                            extent: d3.brushSelection(this).map(yScale[d].invert)
                         });
                     }
                     else if(categoricalFeatures.includes(d)){
@@ -157,9 +159,11 @@ function ParallelCoordinates(props) {
                         })
                     }
                 });
+            console.log(selection)
             console.log(actives)
 
             let selected = [];
+            let unselected = [];
             for(let d in data){
                 //console.log(d)
                 let isActive = actives.every(function(active) {
@@ -177,9 +181,13 @@ function ParallelCoordinates(props) {
                 if(isActive) {
                     selected.push(parseInt(d));
                 }
-            };
-            //console.log(new Set(selected)
+                else {
+                unselected.push(parseInt(d));
+                }
 
+            };
+            console.log(actives)
+            props.updatePermanentSelection("delete", new Set(unselected))
             props.updatePermanentSelection("add", selected)
 
             //props.updatePermanentSelection("set", new Set(selected));
