@@ -146,7 +146,6 @@ updateTemporarySelection={this.updateTemporarySelection()}/>*/
         // only sets for deleting and setting.
         return function(operation, indices) {
             if(operation === "add") {
-                console.log(indices)
                 component.setState(function(prevState) {
                     return {
                         permanentSelection: new Set([...prevState.permanentSelection, ...indices])

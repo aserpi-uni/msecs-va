@@ -10,7 +10,6 @@ function ParallelCoordinates(props) {
 
     useEffect(function() {
         const dimensions = d3.keys(data[0]);
-        //console.log(dimensions);
         const svg = d3.select("#paralCoordChart"),
             h = props.height ,
             w = props.width ;
@@ -18,9 +17,7 @@ function ParallelCoordinates(props) {
         let i;
         let attribute;
         for (i in dimensions) {
-            //console.log("for loop"+i)
             attribute = dimensions[i];
-            //console.log("attribute:"+ attribute)
             if(numericalFeatures.includes(attribute)) {
                 yScale[attribute] = d3.scaleLinear()
                     .domain(d3.extent(data, function (d) {
@@ -43,13 +40,6 @@ function ParallelCoordinates(props) {
             .range([0, w])
             .padding(1);
 
-        //let color;
-        //color = d3.scaleOrdinal()
-         //   .domain(props.labels)
-          //  .range(props.colorScale);
-
-        //console.log(props.colorScale);
-
         function path(d) {
             return d3.line()(dimensions.map(function(p) { return [xScale(p), yScale[p](d[p])]; }));
         }
@@ -64,7 +54,7 @@ function ParallelCoordinates(props) {
             .attr("d",  path)
             .style("fill", "none")
             .style("stroke", "lightgrey")
-            .style("opacity", 0.02)
+            .style("opacity", 0.01)
 
         // Draw the axis: (this is done after the path so that the axis is on top of the lines)
         let g = svg.selectAll(".dimension")
@@ -97,17 +87,25 @@ function ParallelCoordinates(props) {
             .each(function(d) {
                 d3.select(this)
                     .call(yScale[d].brush = d3.brushY()
-                        .extent([[-10,0], [10,h]])
+                        .extent([[-10,-1], [10,h+1]])
                         .on("start", brushstart)
                         .on("brush", brush)
-                        .on("end", brush));
+                        .on("end", brush))
+            //.on("click", onBrushClicked)
+
             })
             .selectAll("rect")
             .attr("x", -8)
             .attr("width", 16);
 
         function brushstart() {
-            props.updatePermanentSelection("delete", props.permanentSelection)
+            d3.event.sourceEvent.stopPropagation();
+        }
+        function onBrushClicked(d){ // da vedere bene
+            d3.select(this)
+                .call(yScale[d].brush.move, [0, 0])
+                //.call(yScale[d].brush.event(d3.select(".brush")))
+
         }
 
         // Handles a brush event, toggling the display of foreground lines.
@@ -115,23 +113,19 @@ function ParallelCoordinates(props) {
             if (!d3.event.sourceEvent) return;
             if(! d3.event.selection) return;
             let actives = [];
-
             let svg = d3.selectAll("#paralCoordChart")
             svg.selectAll(".dimension .brush")
                 .filter(function(d){
                     //console.log("sono nel filter " + d)
-                    console.log(d)
-                    console.log(d3.brushSelection(this))
-                    //yScale[d].brushSelectionValue = d3.brushSelection(this);
+                    yScale[d].brushSelectionValue = d3.brushSelection(this);
                     //console.log(d)
                     //console.log(yScale[d].brushSelectionValue);
                     return d3.brushSelection(this);
                 })
                 .each(function(d){
-                    //console.log(d)
-                    //if (!d3.event.sourceEvent) return; // Only transition after input.
-                    //if (!d3.event.selection) return;
-                    console.log(d)
+                    if (!d3.event.sourceEvent) return; // Only transition after input.
+                    if (!d3.event.selection) return;
+
                     if(numericalFeatures.includes(d)) {
                         console.log(d3.brushSelection(this).map(yScale[d].invert))
                         //const range = d3.event.selection.map(yScale[d].invert)
@@ -143,10 +137,6 @@ function ParallelCoordinates(props) {
                     }
                     else if(categoricalFeatures.includes(d)){
                         const range = yScale[d].domain().map(yScale[d]).reverse()
-                        /*console.log("categorical feature")
-                        console.log(range)
-                        console.log(range.length)
-                        console.log(selection)*/
                         const selection = d3.brushSelection(this);
                         if(selection == null) return;
                         const i0 = d3.bisectRight(range, selection[0]);
@@ -160,9 +150,7 @@ function ParallelCoordinates(props) {
                         })
                     }
                 });
-
             console.log(actives)
-
             let selected = [];
             let unselected = [];
             for(let d in data){
@@ -191,8 +179,6 @@ function ParallelCoordinates(props) {
             props.updatePermanentSelection("delete", new Set(unselected))
             props.updatePermanentSelection("add", selected)
 
-            //props.updatePermanentSelection("set", new Set(selected));
-            //console.log(props.permanentSelection)
 
         }
     }, []);
@@ -203,7 +189,7 @@ function ParallelCoordinates(props) {
         d3.selectAll(".path.line")
             .transition(d3.transition().duration(750))
             .style("stroke",(d, i) => props.colorScale(props.labels[i]))
-            .style("opacity", 0.02)
+            .style("opacity", 0.01)
         }, [props.labels]);
 
     useEffect(function() {
@@ -224,10 +210,10 @@ function ParallelCoordinates(props) {
                 return 0.9;
             }
             else if(props.permanentSelection.has(i)) {return 0.9;}
-            else return 0.02;
+            else return 0.01;
         }
         else if (props.permanentSelection.has(i)){return calcOpacityPerm;}
-        else return 0.02;
+        else return 0.01;
     }
     function calcOpacityPerm(d, i){
         //console.log(props.permanentSelection)
@@ -238,11 +224,14 @@ function ParallelCoordinates(props) {
             }
             else {
                 //console.log("permanentSelection undefined")
-                return 0.02;}
+                return 0.01;}
         }
         else {
 
-            return 0.02;}
+            return 0.01;}
+    }
+    function onClickBrush(){
+        console.log("click")
     }
 
     function calcOpacity(d, i){
@@ -250,7 +239,7 @@ function ParallelCoordinates(props) {
             if (i === props.temporarySelection || props.permanentSelection.has(i) ){
                 return 1;
             }
-            else return 0.02;
+            else return 0.01;
         }
     }
 
