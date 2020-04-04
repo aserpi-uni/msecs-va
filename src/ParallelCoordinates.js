@@ -115,7 +115,7 @@ function ParallelCoordinates(props) {
             if (!d3.event.sourceEvent) return;
             if(! d3.event.selection) return;
             let actives = [];
-            const selection = d3.brushSelection(this);
+
             let svg = d3.selectAll("#paralCoordChart")
             svg.selectAll(".dimension .brush")
                 .filter(function(d){
@@ -147,6 +147,7 @@ function ParallelCoordinates(props) {
                         console.log(range)
                         console.log(range.length)
                         console.log(selection)*/
+                        const selection = d3.brushSelection(this);
                         if(selection == null) return;
                         const i0 = d3.bisectRight(range, selection[0]);
                         const i1 = d3.bisectRight(range, selection[1]);
@@ -159,7 +160,7 @@ function ParallelCoordinates(props) {
                         })
                     }
                 });
-            console.log(selection)
+
             console.log(actives)
 
             let selected = [];
