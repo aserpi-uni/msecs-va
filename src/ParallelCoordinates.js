@@ -108,26 +108,28 @@ function ParallelCoordinates(props) {
 
         }
 
+
         // Handles a brush event, toggling the display of foreground lines.
         function brush() {
             if (!d3.event.sourceEvent) return;
             if(! d3.event.selection) return;
+            //console.log(d3.event.sourceEvent)
             let actives = [];
             let svg = d3.selectAll("#paralCoordChart")
             svg.selectAll(".dimension .brush")
                 .filter(function(d){
-                    //console.log("sono nel filter " + d)
+
                     yScale[d].brushSelectionValue = d3.brushSelection(this);
                     //console.log(d)
                     //console.log(yScale[d].brushSelectionValue);
                     return d3.brushSelection(this);
                 })
                 .each(function(d){
-                    if (!d3.event.sourceEvent) return; // Only transition after input.
-                    if (!d3.event.selection) return;
+                    /*if (!d3.event.sourceEvent) return; // Only transition after input.
+                    if (!d3.event.selection) return;*/
 
                     if(numericalFeatures.includes(d)) {
-                        console.log(d3.brushSelection(this).map(yScale[d].invert))
+                        //console.log(d3.brushSelection(this).map(yScale[d].invert))
                         //const range = d3.event.selection.map(yScale[d].invert)
                         //console.log(range)
                         actives.push({
@@ -138,11 +140,11 @@ function ParallelCoordinates(props) {
                     else if(categoricalFeatures.includes(d)){
                         const range = yScale[d].domain().map(yScale[d]).reverse()
                         const selection = d3.brushSelection(this);
-                        if(selection == null) return;
+
                         const i0 = d3.bisectRight(range, selection[0]);
                         const i1 = d3.bisectRight(range, selection[1]);
                         //console.log(i0 + " " + i1)
-                        let slice = yScale[d].domain().reverse().slice(i0, i1)
+                        //let slice = yScale[d].domain().reverse().slice(i0, i1)
                         //console.log(slice)
                         actives.push({
                             dimension: d,
@@ -150,7 +152,7 @@ function ParallelCoordinates(props) {
                         })
                     }
                 });
-            console.log(actives)
+            //console.log(actives)
             let selected = [];
             let unselected = [];
             for(let d in data){
@@ -175,7 +177,6 @@ function ParallelCoordinates(props) {
                 }
 
             };
-            console.log(actives)
             props.updatePermanentSelection("delete", new Set(unselected))
             props.updatePermanentSelection("add", selected)
 
@@ -193,7 +194,7 @@ function ParallelCoordinates(props) {
         }, [props.labels]);
 
     useEffect(function() {
-        //console.log(props.permanentSelection)
+        console.log(props.permanentSelection)
         d3.selectAll(".path.line")
             //.transition(d3.transition().duration(750))
             .style("opacity", calcOpacityPerm)
