@@ -111,8 +111,8 @@ function ParallelCoordinates(props) {
 
         // Handles a brush event, toggling the display of foreground lines.
         function brush() {
-            if (!d3.event.sourceEvent) return;
-            if(! d3.event.selection) return;
+            //if (!d3.event.sourceEvent) return;
+            //if(! d3.event.selection) return;
             //console.log(d3.event.sourceEvent)
             let actives = [];
             let svg = d3.selectAll("#paralCoordChart")
@@ -125,8 +125,8 @@ function ParallelCoordinates(props) {
                     return d3.brushSelection(this);
                 })
                 .each(function(d){
-                    /*if (!d3.event.sourceEvent) return; // Only transition after input.
-                    if (!d3.event.selection) return;*/
+                    //if (!d3.event.sourceEvent) return; // Only transition after input.
+                    //if (!d3.event.selection) return;
 
                     if(numericalFeatures.includes(d)) {
                         //console.log(d3.brushSelection(this).map(yScale[d].invert))
@@ -152,22 +152,25 @@ function ParallelCoordinates(props) {
                         })
                     }
                 });
-            //console.log(actives)
+            console.log(actives)
             let selected = [];
             let unselected = [];
             for(let d in data){
                 //console.log(d)
                 let isActive = actives.every(function(active) {
                     if(numericalFeatures.includes(active.dimension)) {
+
                         let result = active.extent[1] <= data[d][active.dimension] && data[d][active.dimension] <= active.extent[0];
                         //if(result){console.log(data[d][active.dimension])}
                         return result;
                     }
                     else if(categoricalFeatures.includes(active.dimension)){
+
                         let result = active.extent.includes(data[d][active.dimension])
                         //if(result){console.log(data[d][active.dimension])}
                         return result
                     }
+                    else return null;
                 })
                 if(isActive) {
                     selected.push(parseInt(d));
@@ -177,6 +180,10 @@ function ParallelCoordinates(props) {
                 }
 
             };
+            if (actives.length === 0){
+                props.updatePermanentSelection("delete", new Set(selected))
+                return;
+            }
             props.updatePermanentSelection("delete", new Set(unselected))
             props.updatePermanentSelection("add", selected)
 
@@ -194,7 +201,7 @@ function ParallelCoordinates(props) {
         }, [props.labels]);
 
     useEffect(function() {
-        console.log(props.permanentSelection)
+        //console.log(props.permanentSelection)
         d3.selectAll(".path.line")
             //.transition(d3.transition().duration(750))
             .style("opacity", calcOpacityPerm)
@@ -217,7 +224,7 @@ function ParallelCoordinates(props) {
         else return 0.01;
     }
     function calcOpacityPerm(d, i){
-        //console.log(props.permanentSelection)
+
         if(props.permanentSelection !== undefined){
             if (props.permanentSelection.has(i)){
                 //console.log(i)
