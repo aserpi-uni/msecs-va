@@ -45,8 +45,8 @@ class App extends React.Component {
           firstRowWidth = (width - 3*padding.x) / 3;
 
         return (
-          <Grid id="base" style={{height, width}}>
-              <div>
+          <Grid container id="base" style={{height, width}}>
+              <Grid item xs={6}>
               <Elbow height={commonHeight} padding={padding} width={firstRowWidth}
                      centroids={this.state.centroids} dataset={this.state.dataset}
                      labels={this.state.labels}
@@ -61,9 +61,9 @@ class App extends React.Component {
                     updatePermanentSelection={this.updatePermanentSelection()}
                     temporarySelection={this.state.temporarySelection}
                     updateTemporarySelection={this.updateTemporarySelection()}/>
-                    </div>
-              <div>
-                  <ParallelCoordinates height={commonHeight} padding={padding} width={(firstRowWidth + padding.x)*2}
+                    </Grid>
+              <Grid item xs={6}>
+                  <ParallelCoordinates height={commonHeight} padding={padding} width={(firstRowWidth )}
                                        dataset={this.state.dataset}
                                        labels={this.state.labels[this.state.currentRun]}
                                        colorScale={this.state.colorScale}
@@ -71,9 +71,8 @@ class App extends React.Component {
                                        updatePermanentSelection={this.updatePermanentSelection()}
                                        temporarySelection={this.state.temporarySelection}
                                        updateTemporarySelection={this.updateTemporarySelection()}/>
-              </div>
-              <div>
-                  <Silhouette height={commonHeight} padding={padding} width={(firstRowWidth + padding.x)*2}
+
+                  <Silhouette height={commonHeight} padding={padding} width={(firstRowWidth )}
                               dataset={this.state.dataset}
                               currentRun = {this.state.currentRun}
                               centroids={this.state.centroids}
@@ -85,7 +84,7 @@ class App extends React.Component {
                               temporarySelection={this.state.temporarySelection}
                               updateTemporarySelection={this.updateTemporarySelection()}/>
 
-                    </div>
+                    </Grid>
 
 
 
@@ -93,24 +92,6 @@ class App extends React.Component {
           </Grid>
         )
     }
-    /* <ParallelCoordinates height={commonHeight} padding={padding} width={firstRowWidth}
-                   dataset={this.state.dataset}
-                   centroids={this.state.centroids}
-                   labels={this.state.labels[this.state.currentRun]}
-                   colorScale={this.state.colorScale}
-                   permanentSelection={this.state.permanentSelection}
-                   updatePermanentSelection={this.updatePermanentSelection()}
-                   temporarySelection={this.state.temporarySelection}
-                   updateTemporarySelection={this.updateTemporarySelection()}/>*/
-/*<Silhouette height={commonHeight} padding={padding} width={firstRowWidth}
-dataset={this.state.dataset}
-centroids={this.state.centroids}
-labels={this.state.labels[this.state.currentRun]}
-colorScale={this.state.colorScale}
-permanentSelection={this.state.permanentSelection}
-updatePermanentSelection={this.updatePermanentSelection()}
-temporarySelection={this.state.temporarySelection}
-updateTemporarySelection={this.updateTemporarySelection()}/>*/
 
 
     setBusy() {

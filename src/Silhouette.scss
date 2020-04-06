@@ -1,0 +1,41 @@
+.silhouette {
+  &.bar {
+    opacity: 0.3;
+
+    &:hover {
+      fill: coral;
+      stroke: coral;
+    }
+
+    &.selected {
+      fill: sienna;
+      stroke: sienna;
+    }
+    &.temporary-selection, &.permanent-selection {
+      opacity: 1;
+    }
+  }
+  &.tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 2px;
+    color: #fff;
+    padding: 6px;
+    transition: opacity 0.5s;
+    &:after {
+      box-sizing: border-box;
+      color: rgba(0, 0, 0, 0.8);
+      content: "\25BC";
+      display: inline;
+      font-size: 15px;
+      line-height: 0.6;
+      position: absolute;
+      text-align: center;
+      width: 100%;
+    }
+    &.n:after {
+      left: 0;
+      margin: -1px 0 0 0;
+      top: 100%;
+    }
+  }
+}

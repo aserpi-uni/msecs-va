@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import d3tip from 'd3-tip'
 import React, {useEffect} from "react";
-import "./ParallelCoordinates.scss"
+import "./Silhouette.scss"
 import {distance, categoricalFeatures, numericalFeatures, computeSilhouetteValue} from "./utils"
 const silhouetteDict = {};
 const clustersPerRun = {};
@@ -122,18 +122,26 @@ function Silhouette(props) {
                     return d3.descending(silhouetteDict[run][a[1]], silhouetteDict[run][b[1]])
                 })
             }
+            if(run == 3) {
+                for (let label in clustersPerRun[run]) {
+                    for (let i in clustersPerRun[run][label]) {
+                        console.log(run + " " + label + " " + clustersPerRun[run][label][i] + " " + silhouetteDict[run][clustersPerRun[run][label][i][1]])
+                    }
+                }
+            }
         }
-        //console .log(clustersPerRun)
+        console.log(silhouetteDict)
+        console.log(clustersPerRun)
         for(let run in clustersPerRun){
             let sortedData = []
             let sortedLabels = []
             for(let label in clustersPerRun[run]){
                 sortedLabels.push([label, clustersPerRun[run][label][0]])
             }
-            sortedLabels.sort(function(a, b){return d3.descending(silhouetteDict[run][a[0]], silhouetteDict[run][b[0]])})
-          //  console.log(sortedLabels)
+            sortedLabels.sort(function(a, b){return d3.descending(silhouetteDict[run][a[1][1]], silhouetteDict[run][b[1][1]])})
+            console.log(sortedLabels)
             for (let label in sortedLabels){
-                //console.log(sortedLabels[label])
+                console.log(sortedLabels[label][0] + " : "+clustersPerRun[run][sortedLabels[label][0]][0][1] + " : "+silhouetteDict[run][clustersPerRun[run][sortedLabels[label][0]][0][1]])
                 //console.log(clustersPerRun[run][sortedLabels[label][0]])
                 for(let element in clustersPerRun[run][sortedLabels[label][0]]){
                     sortedData.push(clustersPerRun[run][sortedLabels[label][0]][element])
@@ -142,7 +150,7 @@ function Silhouette(props) {
             }
             sortedDataPerRun[run] = sortedData;
         }
-        //console.log(sortedDataPerRun)
+        console.log(sortedDataPerRun)
         //sortedDataPerRun
         /*console.log("After sorting:");
         console.log(clustersPerRun);
@@ -171,56 +179,15 @@ function Silhouette(props) {
             .attr("class", "MyAxisY")
             .call(d3.axisLeft(yScale));
 
-
-        /*svg.selectAll(".silhouetteBar")
-            .data(data)
-            .enter().append("rect")
-            .attr("class", "silhouetteBar")
-            .attr('x', (d, i) => xScale(i))
-            .attr('width', xScale.bandwidth())
-            .attr('y', (d, i) => yScale(silhouetteDict[0][i]))
-            .attr('height', (d, i) => h - yScale(silhouetteDict[0][i]))*/
-
     }, []);
 
-    /*useEffect(function(){
-        if(props.centroids[props.currentRun] !== undefined) {
-            console.log("current run : "+props.currentRun)
-            console.log(silhouetteDict)
-            //console.log("silhouetteDict[props.currentRun][0]: "+silhouetteDict[props.currentRun][0])
-            let xScale = d3.scaleBand()
-                .domain(d3.range(0, data.length))
-                .range([0, w]);
-            let yScale = d3.scaleLinear()
-                .domain([-1, 1])
-                .range([h, 0]);
-            const svg = d3.select("#silhouetteChart");
-            const update = svg;
-            update.select(".MyAxisX")
-                .call(d3.axisBottom(xScale).tickValues([0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1199]));
 
-            update.selectAll(".silhouetteBar")
-                .remove()
-                .exit()
-                .data(data)
-                .enter()
-                .append('rect')
-                .attr("class", "silhouetteBar")
-                .attr('x', (d, i) => xScale(i))
-                .attr('width', xScale.bandwidth())
-                .attr('y', (d, i) => yScale(silhouetteDict[props.currentRun][i]))
-                .attr('height', (d, i) => h - yScale(silhouetteDict[props.currentRun][i]))
-                .style("fill",(d, i) => props.colorScale(props.currentLabels[i]))
-
-        }
-
-
-    }, props.centroids[props.currentRun]);*/
 
     useEffect(function(){
         if(props.centroids[props.currentRun] !== undefined) {
             console.log("current run : "+props.currentRun)
             console.log(silhouetteDict)
+            console.log(sortedDataPerRun)
             //console.log("silhouetteDict[props.currentRun][0]: "+silhouetteDict[props.currentRun][0])
             let xScale = d3.scaleBand()
                 .domain(d3.range(0, data.length))
@@ -232,6 +199,12 @@ function Silhouette(props) {
             const update = svg;
             update.select(".MyAxisX")
                 .call(d3.axisBottom(xScale).tickValues([0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1199]));
+
+            const tip = d3tip()
+                .attr("class", "silhouette tooltip")
+                .html(d => silhouetteDict[props.currentRun][d[1]] + ", cluster: " + props.currentLabels[d[1]])  // TODO: approximate metric
+                .offset([-10, 0]);
+            svg.call(tip);
 
             update.selectAll(".silhouetteBar")
                 .remove()
@@ -243,12 +216,24 @@ function Silhouette(props) {
                 .attr('x', (d, i) => xScale(i))
                 .attr('width', xScale.bandwidth())
                 .attr('y', (d, i) => yScale(silhouetteDict[props.currentRun][d[1]]))
-                .attr('height', (d, i) => h - yScale(silhouetteDict[props.currentRun][d[1]]))
+                .attr('height', (d, i) => h-yScale(silhouetteDict[props.currentRun][d[1]]))
                 .style("fill",(d, i) => props.colorScale(props.currentLabels[d[1]]))
+                //.classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
+                //.classed("temporary-selection", (d, i) => i === props.temporarySelection)
                 .style("opacity", 0.3)
                 .on("click", onBarClicked)
-                .on("mouseenter", (d, i) => props.updateTemporarySelection(d[1]))
-                .on("mouseout", () => props.updateTemporarySelection(undefined));
+                .on("mouseenter",  d=>props.updateTemporarySelection(d[1]))
+                .on("mouseover", tip.show)
+            /*function(d){
+                props.updateTemporarySelection(d[1])
+                tip.show;
+            }*/
+                .on("mouseleave", props.updateTemporarySelection(undefined))
+                .on("mouseout", tip.hide);
+            /*function(d){
+                props.updateTemporarySelection(undefined)
+                tip.hide;
+            }*/
 
         }
 
@@ -272,6 +257,9 @@ function Silhouette(props) {
 
     function calcOpacityTemp(d){
         if (d[1] === props.temporarySelection){
+            return 0.9;
+        }
+        else if(props.permanentSelection.has(d[1])){
             return 0.9;
         }
         else return 0.3;
