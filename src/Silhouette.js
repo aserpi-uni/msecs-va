@@ -48,73 +48,32 @@ function Silhouette(props) {
                 let b_i = 1;
                 for(let j = 0; j < elements; j++){
                     if(currentLabels[j] === currentLabel){
-                        /*console.log("point and label (C_i)")
-                        console.log(j)
-                        console.log(data[j])
-                        console.log(currentLabels[j])*/
                         C_i += 1; //number of elements in C_i
                         sum_a_i += distanceMatrix[currentIndex][j];
                     }
                     else {
-                        /*console.log("point and label (C_k)")
-                        console.log(j)
-                        console.log(data[j])
-                        console.log(currentLabels[j])*/
                         if(C_k[currentLabels[j]] === undefined){
                             C_k[currentLabels[j]] = 0;
                             sum_b_i[currentLabels[j]] = 0;
                         }
                         C_k[currentLabels[j]] += 1; // number of elements for each C_k, with k != i
-                        //console.log("distanceMatrix["+currentIndex+"]["+j+"] :"+distanceMatrix[currentIndex][j])
                         sum_b_i[currentLabels[j]] += distanceMatrix[currentIndex][j];
                     }
                 }
-                /*console.log(C_i);
-                console.log(sum_a_i);
-                console.log(C_k);
-                console.log("C_k object entries:")
-                console.log(Object.entries(C_k))
-                console.log("sum b_i:")
-                console.log(sum_b_i);*/
                 if(C_i === 1){silhouetteValues[i] = 0;}
                 else {
                     a_i = sum_a_i / (C_i - 1);
                     const cluster_keys = Object.keys(C_k);
-                    //console.log("cluster_keys:")
-                    //console.log(cluster_keys)
                     for (let subkey in cluster_keys) {
-                        /*console.log("sum b_i["+clusters[subkey]+"]:")
-                        console.log(sum_b_i[clusters[subkey]]);
-                        console.log("C_k[clusters["+subkey+"]]:")
-                        console.log(C_k[clusters[subkey]])
-                        console.log(sum_b_i[clusters[subkey]]/C_k[clusters[subkey]])*/
                         b_i_set[cluster_keys[subkey]] = sum_b_i[cluster_keys[subkey]]/C_k[cluster_keys[subkey]]
-                        /*console.log("results:")
-                        console.log(b_i_set)*/
                     }
-                    //console.log(a_i)
-                    //console.log(b_i_set)
-                    //console.log(d3.min(Object.values(b_i_set)))
                     b_i = d3.min(Object.values(b_i_set));
-                    //console.log("a_i: "+a_i)
-                    //console.log("b_i: "+b_i)
-                    //console.log("max(a_i, b_i): "+d3.max([a_i, b_i]))
                     let s_i = (b_i - a_i) / (d3.max([a_i, b_i]));
-                    //console.log("s_i: " +s_i)
                     silhouetteValues[i] =  s_i;
                 }
             }
             silhouetteDict[key]= silhouetteValues;
         }
-        /*for(const [key,value] of  Object.entries(props.centroids)) {
-            let silhouetteValues = {}
-            for (let i = 0; i < elements; i++) {
-                silhouetteValues[i] = 0;
-            }
-            silhouetteDict[0] = silhouetteValues;
-        }*/
-        //console.log("Before sorting:");
-        //console.log(clustersPerRun);
         //sorting inside groups
         for(let run in clustersPerRun){
             for (let label in clustersPerRun[run]) {
@@ -122,16 +81,7 @@ function Silhouette(props) {
                     return d3.descending(silhouetteDict[run][a[1]], silhouetteDict[run][b[1]])
                 })
             }
-            if(run == 3) {
-                for (let label in clustersPerRun[run]) {
-                    for (let i in clustersPerRun[run][label]) {
-                        console.log(run + " " + label + " " + clustersPerRun[run][label][i] + " " + silhouetteDict[run][clustersPerRun[run][label][i][1]])
-                    }
-                }
-            }
         }
-        console.log(silhouetteDict)
-        console.log(clustersPerRun)
         for(let run in clustersPerRun){
             let sortedData = []
             let sortedLabels = []
@@ -139,26 +89,17 @@ function Silhouette(props) {
                 sortedLabels.push([label, clustersPerRun[run][label][0]])
             }
             sortedLabels.sort(function(a, b){return d3.descending(silhouetteDict[run][a[1][1]], silhouetteDict[run][b[1][1]])})
-            console.log(sortedLabels)
             for (let label in sortedLabels){
-                console.log(sortedLabels[label][0] + " : "+clustersPerRun[run][sortedLabels[label][0]][0][1] + " : "+silhouetteDict[run][clustersPerRun[run][sortedLabels[label][0]][0][1]])
-                //console.log(clustersPerRun[run][sortedLabels[label][0]])
                 for(let element in clustersPerRun[run][sortedLabels[label][0]]){
                     sortedData.push(clustersPerRun[run][sortedLabels[label][0]][element])
                 }
-            //    console.log(sortedData)
             }
             sortedDataPerRun[run] = sortedData;
         }
-        console.log(sortedDataPerRun)
-        //sortedDataPerRun
-        /*console.log("After sorting:");
-        console.log(clustersPerRun);
-        for(let i = 0; i<clustersPerRun[2][1].length; i++){
-            console.log(silhouetteDict[2][clustersPerRun[2][1][i][1]])
-        }
-        console.log(silhouetteDict);*/
+        const rootSvg = d3.select("#rootSilhouetteChart")
         const svg = d3.select("#silhouetteChart")
+
+        rootSvg.on("click", onBackgroundClicked);
 
         let yScale = d3.scaleLinear()
             .domain([-1, 1])
@@ -166,13 +107,10 @@ function Silhouette(props) {
         let xScale = d3.scaleLinear()
              .domain([0, data.length])
              .range([0,w])
-            //.padding("0.05");
-        /*let xScale = d3.scaleBand()
-            .domain(d3.range(0, data.length))
-            .range([0, w]);*/
+
         svg.append("g")
             .attr("class", "MyAxisX")
-            .attr("transform", `translate(0, ${h})`)
+            .attr("transform", `translate(5, ${h})`)
             .call(d3.axisBottom(xScale));
 
         svg.append("g")
@@ -181,14 +119,8 @@ function Silhouette(props) {
 
     }, []);
 
-
-
     useEffect(function(){
         if(props.centroids[props.currentRun] !== undefined) {
-            console.log("current run : "+props.currentRun)
-            console.log(silhouetteDict)
-            console.log(sortedDataPerRun)
-            //console.log("silhouetteDict[props.currentRun][0]: "+silhouetteDict[props.currentRun][0])
             let xScale = d3.scaleBand()
                 .domain(d3.range(0, data.length))
                 .range([0, w]);
@@ -196,13 +128,15 @@ function Silhouette(props) {
                 .domain([-1, 1])
                 .range([h, 0]);
             const svg = d3.select("#silhouetteChart");
+            svg.on("click", onBackgroundClicked);
+
             const update = svg;
             update.select(".MyAxisX")
                 .call(d3.axisBottom(xScale).tickValues([0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1199]));
 
             const tip = d3tip()
                 .attr("class", "silhouette tooltip")
-                .html(d => silhouetteDict[props.currentRun][d[1]] + ", cluster: " + props.currentLabels[d[1]])  // TODO: approximate metric
+                .html(d => silhouetteDict[props.currentRun][d[1]] + ", cluster: " + props.currentLabels[d[1]] + ", members: " + clustersPerRun[props.currentRun][props.currentLabels[d[1]]].length)
                 .offset([-10, 0]);
             svg.call(tip);
 
@@ -213,36 +147,30 @@ function Silhouette(props) {
                 .enter()
                 .append('rect')
                 .attr("class", "silhouetteBar")
-                .attr('x', (d, i) => xScale(i))
+                .attr('x', (d, i) => xScale(i) + 5)
                 .attr('width', xScale.bandwidth())
                 .attr('y', (d, i) => yScale(silhouetteDict[props.currentRun][d[1]]))
                 .attr('height', (d, i) => h-yScale(silhouetteDict[props.currentRun][d[1]]))
                 .style("fill",(d, i) => props.colorScale(props.currentLabels[d[1]]))
-                //.classed("permanent-selection", (d, i) => props.permanentSelection.has(i))
-                //.classed("temporary-selection", (d, i) => i === props.temporarySelection)
                 .style("opacity", 0.3)
                 .on("click", onBarClicked)
-                .on("mouseenter",  d=>props.updateTemporarySelection(d[1]))
-                .on("mouseover", tip.show)
-            /*function(d){
-                props.updateTemporarySelection(d[1])
-                tip.show;
-            }*/
-                .on("mouseleave", props.updateTemporarySelection(undefined))
-                .on("mouseout", tip.hide);
-            /*function(d){
-                props.updateTemporarySelection(undefined)
-                tip.hide;
-            }*/
+                .on("mouseover",  d=>props.updateTemporarySelection(d[1]))
+                .on("mouseenter", tip.show)
+                .on("mouseout", d=>props.updateTemporarySelection(undefined))
+                .on("mouseleave", tip.hide);
 
         }
-
-
     }, props.centroids[props.currentRun]);
 
-    function onBarClicked(d, i) {
+    function onBarClicked(d) {
         d3.event.stopPropagation();
         props.updatePermanentSelection("add",[d[1]]);
+    }
+    function onBackgroundClicked() {
+        // Shift+click on background is almost always a mis-click
+        console.log("clicked background")
+        d3.event.stopPropagation();
+       props.updatePermanentSelection("set", new Set([]))
     }
 
     useEffect(function() {
