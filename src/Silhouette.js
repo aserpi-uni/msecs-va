@@ -6,6 +6,7 @@ import {distance, categoricalFeatures, numericalFeatures, computeSilhouetteValue
 const silhouetteDict = {};
 const clustersPerRun = {};
 const sortedDataPerRun = {};
+const sortedLabelsPerRun = {};
 function Silhouette(props) {
     //console.log(props.centroids);
 
@@ -95,6 +96,7 @@ function Silhouette(props) {
                 }
             }
             sortedDataPerRun[run] = sortedData;
+            sortedLabelsPerRun[run] = sortedLabels;
         }
         const rootSvg = d3.select("#rootSilhouetteChart")
         const svg = d3.select("#silhouetteChart")
@@ -135,17 +137,23 @@ function Silhouette(props) {
                 .domain([-1, 1])
                 .range([h, 0]);
             const svg = d3.select("#silhouetteChart");
-            svg.on("click", onBackgroundClicked);
-
+            //svg.on("click", onBackgroundClicked);
+            let xDomain = new Array(clustersPerRun[props.currentRun].length)
+            for(let i in sortedLabelsPerRun[props.currentRun]){
+                let precValue = 0;
+                if(i != 0) precValue = xDomain[i-1];
+                xDomain[i] = (precValue+clustersPerRun[props.currentRun][sortedLabelsPerRun[props.currentRun][i][0]].length)
+            }
+            xDomain.splice(-1, 1, 0)
             const update = svg;
             update.select(".MyAxisX")
-                .call(d3.axisBottom(xScale).tickValues([0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1199]));
+                .call(d3.axisBottom(xScale).tickValues(xDomain));
 
             const tip = d3tip()
                 .attr("class", "silhouette tooltip")
                 .html(d => silhouetteDict[props.currentRun][d[1]] + ", cluster: " + props.currentLabels[d[1]] + ", members: " + clustersPerRun[props.currentRun][props.currentLabels[d[1]]].length)
                 .offset([-10, 0]);
-            svg.call(tip);
+            update.call(tip);
 
             update.selectAll(".silhouetteBar")
                 .remove()
@@ -161,6 +169,7 @@ function Silhouette(props) {
                 .style("fill",(d, i) => props.colorScale(props.currentLabels[d[1]]))
                 .style("opacity", 0.3)
                 .on("click", onBarClicked)
+                .on("dblclick", onBarDoubleClicked)
                 .on("mouseover",  d=>props.updateTemporarySelection(d[1]))
                 .on("mouseenter", tip.show)
                 .on("mouseout", d=>props.updateTemporarySelection(undefined))
@@ -172,6 +181,14 @@ function Silhouette(props) {
     function onBarClicked(d) {
         d3.event.stopPropagation();
         props.updatePermanentSelection("add",[d[1]]);
+    }
+    function onBarDoubleClicked(d){
+        d3.event.stopPropagation();
+        let array = []
+        for(let i in clustersPerRun[props.currentRun][props.labels[props.currentRun][d[1]]]){
+            array.push( clustersPerRun[props.currentRun][props.labels[props.currentRun][d[1]]][i][1])
+        }
+        props.updatePermanentSelection("add",array);
     }
     function onBackgroundClicked() {
         // Shift+click on background is almost always a mis-click
