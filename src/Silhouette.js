@@ -108,6 +108,13 @@ function Silhouette(props) {
              .domain([0, data.length])
              .range([0,w])
 
+        svg.append("rect")
+            .attr("x", 5)
+            .attr("height", h)
+            .attr("width", w)
+            .style("fill", "white")
+            .on("click", onBackgroundClicked)
+
         svg.append("g")
             .attr("class", "MyAxisX")
             .attr("transform", `translate(5, ${h})`)
