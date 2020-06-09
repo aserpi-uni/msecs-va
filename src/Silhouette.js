@@ -122,6 +122,14 @@ function Silhouette(props) {
             .attr("transform", `translate(5, ${h})`)
             .call(d3.axisBottom(xScale));
 
+        svg.append("line")
+            .attr("x1", 5)
+            .attr("x2", w)
+            .attr("y1", yScale(0))
+            .attr("y2", yScale(0))
+            .style("stroke-dasharray", 4)
+            .style("stroke", "black")
+
         svg.append("g")
             .attr("class", "MyAxisY")
             .call(d3.axisLeft(yScale));
