@@ -151,7 +151,7 @@ function Silhouette(props) {
 
             const tip = d3tip()
                 .attr("class", "silhouette tooltip")
-                .html(d => silhouetteDict[props.currentRun][d[1]] + ", cluster: " + props.currentLabels[d[1]] + ", members: " + clustersPerRun[props.currentRun][props.currentLabels[d[1]]].length)
+                .html(d => `Score: <strong>${silhouetteDict[props.currentRun][d[1]]}</strong><br>Cluster: <strong>${props.currentLabels[d[1]]}</strong><br>Members: ${clustersPerRun[props.currentRun][props.currentLabels[d[1]]].length}`)
                 .offset([-10, 0]);
             update.call(tip);
 
