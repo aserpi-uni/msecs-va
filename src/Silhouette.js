@@ -111,7 +111,6 @@ function Silhouette(props) {
              .range([0,w])
 
         svg.append("rect")
-            .attr("x", 5)
             .attr("height", h)
             .attr("width", w)
             .style("fill", "white")
@@ -119,11 +118,11 @@ function Silhouette(props) {
 
         svg.append("g")
             .attr("class", "MyAxisX")
-            .attr("transform", `translate(5, ${h})`)
+            .attr("transform", `translate(0, ${h})`)
             .call(d3.axisBottom(xScale));
 
         svg.append("line")
-            .attr("x1", 5)
+            .attr("x1", 0)
             .attr("x2", w)
             .attr("y1", yScale(0))
             .attr("y2", yScale(0))
@@ -170,7 +169,7 @@ function Silhouette(props) {
                 .enter()
                 .append('rect')
                 .attr("class", "silhouetteBar")
-                .attr('x', (d, i) => xScale(i) + 5)
+                .attr('x', (d, i) => xScale(i))
                 .attr('width', xScale.bandwidth())
                 .attr('y', (d, i) => yScale(silhouetteDict[props.currentRun][d[1]]))
                 .attr('height', (d, i) => h-yScale(silhouetteDict[props.currentRun][d[1]]))
