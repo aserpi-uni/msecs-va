@@ -31,8 +31,7 @@ class App extends React.Component {
     }
 
     render() {
-        // Need 4px of fake padding, otherwise Firefox displays scrollbars
-        const h = document.documentElement.clientHeight - 4,
+        const h = document.documentElement.clientHeight,
           w = document.documentElement.clientWidth;
 
         if(this.state.dataset) return this.renderApp(w, h);
@@ -40,59 +39,62 @@ class App extends React.Component {
     }
 
     renderApp(width, height) {
-        const padding = {x: 50, y: 50},
-          commonHeight = (height - 3*padding.y) / 2,
-          firstRowWidth = (width - 3*padding.x) / 3;
+        const padding = {x: 56, y: 56},
+          componentHeight = (height - 4*padding.y) / 2,
+          baseComponentWidth = (width - 4*padding.x) / 3;  // TODO
 
         return (
           <Grid container id="base" style={{height, width}}>
-              <Grid item xs={6}>
-              <Elbow height={commonHeight} padding={padding} width={firstRowWidth}
-                     centroids={this.state.centroids} dataset={this.state.dataset}
-                     labels={this.state.labels}
-                     busy={this.state.busy} onRunChange={this.updateFromElbow()}/>
+              <Grid container item style={{height, width: baseComponentWidth + 2*padding.x}}>
+                  <Grid item xs={12}>
+                      <Elbow height={componentHeight} padding={padding} width={baseComponentWidth}
+                             centroids={this.state.centroids} dataset={this.state.dataset}
+                             labels={this.state.labels}
+                             busy={this.state.busy} onRunChange={this.updateFromElbow()}/>
+                  </Grid>
 
-              <Umap height={commonHeight} padding={padding} width={firstRowWidth}
-                    dataset={this.state.dataset} labels={this.state.labels[this.state.currentRun]}
-                    colorScale={this.state.colorScale} distance={distance}
-                    minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
-                    setBusy={this.setBusy()}
-                    permanentSelection={this.state.permanentSelection}
-                    updatePermanentSelection={this.updatePermanentSelection()}
-                    temporarySelection={this.state.temporarySelection}
-                    updateTemporarySelection={this.updateTemporarySelection()}/>
-                    </Grid>
-              <Grid item xs={6}>
-                  <ParallelCoordinates height={commonHeight} padding={padding} width={(firstRowWidth )}
-                                       dataset={this.state.dataset}
-                                       labels={this.state.labels[this.state.currentRun]}
-                                       colorScale={this.state.colorScale}
-                                       permanentSelection={this.state.permanentSelection}
-                                       updatePermanentSelection={this.updatePermanentSelection()}
-                                       temporarySelection={this.state.temporarySelection}
-                                       updateTemporarySelection={this.updateTemporarySelection()}/>
+                  <Grid item xs={12}>
+                      <Umap height={componentHeight} padding={padding} width={baseComponentWidth}
+                            dataset={this.state.dataset} labels={this.state.labels[this.state.currentRun]}
+                            colorScale={this.state.colorScale} distance={distance}
+                            minDist={this.state.umap.minDist} nNeighbors={this.state.umap.nNeighbors}
+                            setBusy={this.setBusy()}
+                            permanentSelection={this.state.permanentSelection}
+                            updatePermanentSelection={this.updatePermanentSelection()}
+                            temporarySelection={this.state.temporarySelection}
+                            updateTemporarySelection={this.updateTemporarySelection()}/>
+                  </Grid>
+              </Grid>
 
-                  <Silhouette height={commonHeight} padding={padding} width={(firstRowWidth )}
-                              dataset={this.state.dataset}
-                              currentRun = {this.state.currentRun}
-                              centroids={this.state.centroids}
-                              labels = {this.state.labels}
-                              currentLabels={this.state.labels[this.state.currentRun]}
-                              colorScale={this.state.colorScale}
-                              permanentSelection={this.state.permanentSelection}
-                              updatePermanentSelection={this.updatePermanentSelection()}
-                              temporarySelection={this.state.temporarySelection}
-                              updateTemporarySelection={this.updateTemporarySelection()}/>
+              <Grid container item style={{height, width: baseComponentWidth + 2*padding.x}}>
+                  <Grid item xs={12}>
+                      <ParallelCoordinates height={componentHeight} padding={padding} width={baseComponentWidth * 2}
+                                           dataset={this.state.dataset}
+                                           labels={this.state.labels[this.state.currentRun]}
+                                           colorScale={this.state.colorScale}
+                                           permanentSelection={this.state.permanentSelection}
+                                           updatePermanentSelection={this.updatePermanentSelection()}
+                                           temporarySelection={this.state.temporarySelection}
+                                           updateTemporarySelection={this.updateTemporarySelection()}/>
+                  </Grid>
 
-                    </Grid>
-
-
-
-
+                  <Grid item xs={12}>
+                      <Silhouette height={componentHeight} padding={padding} width={baseComponentWidth * 2}
+                                  dataset={this.state.dataset}
+                                  currentRun = {this.state.currentRun}
+                                  centroids={this.state.centroids}
+                                  labels = {this.state.labels}
+                                  currentLabels={this.state.labels[this.state.currentRun]}
+                                  colorScale={this.state.colorScale}
+                                  permanentSelection={this.state.permanentSelection}
+                                  updatePermanentSelection={this.updatePermanentSelection()}
+                                  temporarySelection={this.state.temporarySelection}
+                                  updateTemporarySelection={this.updateTemporarySelection()}/>
+                  </Grid>
+              </Grid>
           </Grid>
         )
     }
-
 
     setBusy() {
         const component = this;
