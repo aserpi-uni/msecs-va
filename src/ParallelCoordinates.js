@@ -26,8 +26,10 @@ function ParallelCoordinates(props) {
                     .range([h, 0])
             }
             else if (categoricalFeatures.includes(attribute)){
+                const domain = data.map(d => d[attribute])
+                domain.sort(d3.ascending);
                 yScale[attribute] = d3.scalePoint()
-                    .domain(data.map(function(d){return d[attribute];}))
+                    .domain(domain)
                     .range([h, 0])
                     .padding(1);
 
