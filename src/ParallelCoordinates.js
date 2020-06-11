@@ -38,7 +38,6 @@ function ParallelCoordinates(props) {
         xScale = d3.scalePoint()
             .domain(dimensions)
             .range([0, w])
-            .padding(1);
 
         function path(d) {
             return d3.line()(dimensions.map(function(p) { return [xScale(p), yScale[p](d[p])]; }));
