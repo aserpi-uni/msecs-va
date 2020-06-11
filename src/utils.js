@@ -35,50 +35,112 @@ function parseDatasetElement(d) {
 
 // Elbow-method objects
 
-let commonElbowDenominator = undefined;
+let betweenDistances = undefined,
+  classifiedDataset = undefined,
+  withinSquaredDistances = undefined;
 
 
-function computeCommonElbowDenominator(dataset) {
-    let totalDistance = 0;
-    for(let i = 0; i < dataset.length; i++) {
-        for(let j = i + 1; j < dataset.length; j++) {
-            totalDistance += distance(dataset[i], dataset[j])**2
+function computeBetweenDistances(dataset) {
+    betweenDistances = {};
+
+    Object.keys(classifiedDataset).forEach(function (run) {
+        betweenDistances[run] = {};
+
+        Object.keys(classifiedDataset[run]).forEach(function (i) {
+            betweenDistances[run][i] = 0;
+
+            classifiedDataset[run][i].forEach(function (j) {
+                dataset.forEach(function (l) {
+                    betweenDistances[run][i] += distance(j, l);
+                })
+            })
+
+            betweenDistances[run][i] = betweenDistances[run][i]**2;
+        })
+    })
+}
+
+function computeClassifiedDataset(dataset, labels) {
+    classifiedDataset = {};
+
+    Object.keys(labels).forEach(function (run) {
+        classifiedDataset[run] = {};
+
+        for(let i = 0; i < dataset.length; i++) {
+            const c = labels[run][i];
+
+            if(classifiedDataset[run][c] === undefined) {
+                classifiedDataset[run][c] = [];
+            }
+
+            classifiedDataset[run][c].push(dataset[i])
         }
-    }
-
-    commonElbowDenominator = totalDistance * dataset.length;
+    });
 }
 
 
-function computeSse(dataset, labels, centroids) {
+function computeFScore(n) {
+    const fScore = {};
+
+    Object.keys(betweenDistances).forEach(function (run) {
+        fScore[run] = 0;
+
+        const clusters = parseInt(run),
+            coef = (n - clusters) / ((clusters - 1) * (n**2));
+
+        Object.keys(betweenDistances[run]).forEach(function (i) {
+            fScore[run] += classifiedDataset[run][i].length * (betweenDistances[run][i]**2) / withinSquaredDistances[run][i];
+        })
+
+        fScore[run] = coef * fScore[run];
+    })
+
+    return fScore;
+}
+
+
+function computeSse() {
     const sse = {};
-    for(let i = 0; i < dataset.length; i++) {
-        const c = labels[i];
-        sse[c] = (sse[c] || 0) + distance(dataset[i], centroids[c])**2
-    }
+    Object.keys(withinSquaredDistances).forEach(function (run) {
+        sse[run] = 0;
 
-    return d3.sum(Object.keys(sse), k => sse[k])
+        Object.keys(withinSquaredDistances[run]).forEach(function (i) {
+            sse[run] += withinSquaredDistances[run][i] / (classifiedDataset[run][i].length **2);
+        })
+    })
+
+    return sse;
 }
 
 
-function computeWeightedSquareOfDistance(dataset, labels, k) {
-    const se = {},
-      clusterLength = {};
-    for(let i = 0; i < dataset.length; i++) {
-        const c = labels[i],
-          d = dataset[i];
-        clusterLength[c] = (clusterLength[c] || 0) + 1;
-        se[c] = (se[c] || 0) + d3.sum(dataset, d2 => distance(d, d2))
-    }
+function computeWithinSquaredDistances() {
+    withinSquaredDistances = {};
 
-    return d3.sum(Object.keys(se), c => se[c]**2 / clusterLength[c]) / (k - 1)
+    Object.keys(classifiedDataset).forEach(function (run) {
+        withinSquaredDistances[run] = {};
+
+        Object.keys(classifiedDataset[run]).forEach(function (i) {
+            classifiedDataset[run][i].forEach(function (j) {
+                let pointDist = 0
+
+                classifiedDataset[run][i].forEach(function (l) {
+                    pointDist += distance(j, l);
+                })
+
+                withinSquaredDistances[run][i] = (withinSquaredDistances[run][i] || 0) + pointDist**2;
+            })
+        })
+    })
 }
 
 
-function computeVariance(dataset, labels, k) {
-    if(! commonElbowDenominator) computeCommonElbowDenominator(dataset);
-    return computeWeightedSquareOfDistance(dataset, labels, k) / commonElbowDenominator
+function initElbow(dataset, labels) {
+    computeClassifiedDataset(dataset, labels);
+    computeBetweenDistances(dataset);
+    computeWithinSquaredDistances();
+    return [computeSse(), computeFScore(dataset.length)];
 }
+
 
 // Silhouette-method objects
 
@@ -117,4 +179,4 @@ function computeSilhouetteValue(dataset, centroids, dimensionMatrix, index, inde
 }
 
 
-export { computeSse, computeVariance, distance, init, parseDatasetElement, categoricalFeatures, numericalFeatures, computeSilhouetteValue }
+export { computeSilhouetteValue, distance, init, initElbow, parseDatasetElement, categoricalFeatures, numericalFeatures }
