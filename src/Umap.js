@@ -19,18 +19,17 @@ import './Umap.scss'
 
 
 const maxZoom = 20;
-const minDistMarks = [...Array(9).keys()].map(function(x) {
-    x = (x + 1) / 10;
+const minDistMarks = [...Array(10).keys()].map(function(x) {
+    x = x / 10;
     return { label: x.toString(), value: x }
 });
-minDistMarks.push({label: "0", value: 0.01});
 minDistMarks.push({label: "1", value: 0.99});
 const nEpochs = 500;
 const nNeighborsMarks = [...Array(8).keys()].map(function (x) {
     x = (x + 1) * 25;
     return {label: x.toString(), value: x}
 });
-nNeighborsMarks.push({label: "0", value: 1});
+nNeighborsMarks.push({label: "2", value: 2});
 nNeighborsMarks.push({label: "15", value: 15});
 
 
@@ -299,12 +298,12 @@ function Umap(props) {
                   </Typography>
 
                   <Slider className="umap settings min-dist slider"
-                          defaultValue={minDist} max={0.99} min={0.01} step={0.01} value={minDistTemp}
+                          defaultValue={minDist} max={0.99} min={0} step={0.01} value={minDistTemp}
                           marks={minDistMarks} valueLabelDisplay="auto"
                           onChange={onMinDistChange}/>
 
                   <Input className="umap settings min-dist number"
-                         inputProps={{max: 1, min: 0.01, step: 0.1, type: "number"}}
+                         inputProps={{max: 1, min: 0, step: 0.1, type: "number"}}
                          value={minDistTemp} onChange={onMinDistChange}/>
 
                   <Typography variant="h5" className="umap settings n-neighbors header">
@@ -312,7 +311,7 @@ function Umap(props) {
                   </Typography>
 
                   <Slider className="umap settings n-neighbors slider"
-                          defaultValue={nNeighbors} max={200} min={1} value={nNeighborsTemp}
+                          defaultValue={nNeighbors} max={200} min={2} value={nNeighborsTemp}
                           marks={nNeighborsMarks} valueLabelDisplay="auto"
                           onChange={onNNeighborsChange}/>
 
