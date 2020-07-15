@@ -222,14 +222,14 @@ function ParallelCoordinates(props) {
             else if(props.permanentSelection.has(i)) {
                 if(props.permanentSelection.size <= 5){return 2;}
                 else if(props.permanentSelection.size<= 10){return 1.5;}
-                else return 1;
+                else return 1.3;
             }
             else return 1;
         }
         else if (props.permanentSelection.has(i)){
             if(props.permanentSelection.size <= 5){return 2;}
             else if(props.permanentSelection.size <= 10){return 1.5;}
-            else return 1;
+            else return 1.3;
         }
         else return 1;
     }
