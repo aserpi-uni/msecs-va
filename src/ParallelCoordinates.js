@@ -55,7 +55,7 @@ function ParallelCoordinates(props) {
             .attr("d",  path)
             .style("fill", "none")
             .style("stroke", "lightgrey")
-            .style("opacity", 0.01)
+            .style("opacity", 0.008)
 
         // Draw the axis: (this is done after the path so that the axis is on top of the lines)
         let g = svg.selectAll(".dimension")
@@ -212,11 +212,31 @@ function ParallelCoordinates(props) {
         d3.selectAll(".path.line")
             //.transition(d3.transition().duration(120))
             .style("opacity", calcOpacityTemp)
+            .style("stroke-width", calcWidth)
     }, [props.temporarySelection]);
+    function calcWidth(d, i) {
+        if(props.temporarySelection !== undefined){
+            if (i === props.temporarySelection){
+                return 2.5;
+            }
+            else if(props.permanentSelection.has(i)) {
+                if(props.permanentSelection.size <= 5){return 2;}
+                else if(props.permanentSelection.size<= 10){return 1.5;}
+                else return 1;
+            }
+            else return 1;
+        }
+        else if (props.permanentSelection.has(i)){
+            if(props.permanentSelection.size <= 5){return 2;}
+            else if(props.permanentSelection.size <= 10){return 1.5;}
+            else return 1;
+        }
+        else return 1;
+    }
     function calcOpacityTemp(d, i){
         if(props.temporarySelection !== undefined){
             if (i === props.temporarySelection){
-                return 0.9;
+                return 1;
             }
             else if(props.permanentSelection.has(i)) {return 0.9;}
             else return 0.01;
@@ -229,7 +249,7 @@ function ParallelCoordinates(props) {
         if(props.permanentSelection !== undefined){
             if (props.permanentSelection.has(i)){
                 //console.log(i)
-                return 0.9;
+                return 1;
             }
             else {
                 //console.log("permanentSelection undefined")
@@ -248,7 +268,7 @@ function ParallelCoordinates(props) {
             if (i === props.temporarySelection || props.permanentSelection.has(i) ){
                 return 1;
             }
-            else return 0.01;
+            else return 0.005;
         }
     }
 
