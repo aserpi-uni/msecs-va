@@ -1,68 +1,75 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# UVAP - Untitled Visual Analytics Project
+UVAP (short for Untitled Visual Analytics Projects)  was developed as final project for the Visual Analytics course teached at [Sapienza University of Rome](https://www.uniroma1.it/en).
+It is meant to  help data analysts choose the optimal *k* for *k*-prototypes.
 
-## Available Scripts
+Users run *k*-prototypes several times with different values of *k*.
+Then, use UVAP to choose a 
 
-In the project directory, you can run:
+## Server
+The server behaves exactly as a React app, so `npm start` launches the app in development mode.
+Simply open [http://localhost:3000/](http://localhost:3000/) to view it in the browser.
 
-### `npm start`
+Datasets are passed directly through the browser as a folder or collection of files.
+A dataset is composed by:
+ - `dataset.csv`: CSV file with the actual dataset, must have a header
+ - `dataset.json`: JSON file with the hyper-parameters (see below)
+ - `centroids_x.csv`: CSV files (with header) containing the centroids outputted by *k*-prototypes when *k* = `x`
+ - `labels_x.csv`: list of labels outputted by *k*-prototypes when *k* = `x`
+ 
+### `dataset.json`
+Example of a `dataset.json` file.
+The `umap` key can be omitted, it overrides the default values for UAMP.
+```
+{
+    "gamma": 1.9130857071,
+    "categoricalFeatures": ["f0", "f1", "f3", "f7"],
+    "numericalFeatures": ["f2", "f4", "f5", "f6"],
+    "umap": {
+        "minDist": 0.1,
+        "nNeighbors": 10
+    }
+}
+```
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## Charts
+UVAP is composed by four charts:
+ - top left: elbow method
+ - top right: ParCoords
+ - bottom left: UMAP
+ - bottom right: silhouette
+In order to change the settings for a given chart, click on the adjacent gear symbol.
+ 
+### Elbow method
+The elbow method is a heuristic used in determining the number of clusters in a data set.
+There are several metrics that can be used in an elbow chart.
+However, they all work exclusively with numerical elements.
+Thus, we chose the two most widely used and extended to mixed datasets.
 
-### `npm test`
+### ParCoords
+ParCoords (parallel coordinates) are a common way of visualising and analysing high-dimensional data.
+Each axis represent a feature.
+Samples are drawn as lines connecting the axes.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The chart supports selection across multiple axes.
 
-### `npm run build`
+### UMAP
+UMAP (Uniform Manifold Approximation and Projection) is a non-linear dimensionality reduction algorithms that does not rely on a specific metric.
+Thus, we used distance function defined by the *k*-prototypes algorithm.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Clicking on a single point replaces the current selection with the one point.
+If also `shift` is pressed, the point is added to the selection.
+Brushing with `shift` adds points to, whereas with `ctr` removes them from, the selection.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+### Silhouette
+Silhouette provides a rough estimation of how well elements have been classified.
+A numerical value in \[-1, 1\] is associated to each element.
+The higher it is, the better the centroid represent the element.
+Values lower than 0 mean that the second-nearest centroid is actually a better fit.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Interaction
+The elbow chart has a master/slave relationship with the other tree.
+Clicking on a run automatically updates ParCoords, UMAP and silhouette.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+Conversely, the other charts are at the same level.
+A selection change is immediately propagated among all three charts.
